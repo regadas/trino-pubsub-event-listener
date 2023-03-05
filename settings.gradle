@@ -9,4 +9,4 @@
  */
 
 rootProject.name = 'trino-pubsub-listener'
-include('lib')
+include('plugin')
