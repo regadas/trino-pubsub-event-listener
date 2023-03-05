@@ -1,0 +1,11 @@
+{
+  "files.watcherExclude": {
+    "**/target": true
+  },
+  "java.compile.nullAnalysis.mode": "automatic",
+  "java.configuration.updateBuildConfiguration": "automatic",
+  "[java]": {
+    "spotlessGradle.format.enable": true,
+    "spotlessGradle.diagnostics.enable": true
+  }
+}
