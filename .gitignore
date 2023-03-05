@@ -1,7 +1,7 @@
 .gradle
 **/build/
 !src/**/build/
-lib/bin
+plugin/bin
 
 # Ignore Gradle GUI config
 gradle-app.setting
