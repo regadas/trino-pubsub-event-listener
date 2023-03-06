@@ -19,24 +19,23 @@ import io.trino.spi.eventlistener.SplitCompletedEvent;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
-import org.apache.logging.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class PubSubEventListener implements EventListener, AutoCloseable {
     private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final Logger LOG =
+            Logger.getLogger(PubSubEventListener.class.getPackage().getName());
 
     private final PubSubEventListenerConfig config;
     private final Publisher publisher;
-    private final Logger logger;
 
-    PubSubEventListener(PubSubEventListenerConfig config, Publisher publisher, Logger logger) {
+    PubSubEventListener(PubSubEventListenerConfig config, Publisher publisher) {
         this.config = requireNonNull(config, "config is null");
         this.publisher = requireNonNull(publisher, "publisher is null");
-        this.logger = requireNonNull(logger, "logger is null");
     }
 
     public static PubSubEventListener create(PubSubEventListenerConfig config) throws IOException {
-        var logger = config.loggerContext().getLogger(PubSubEventListener.class);
-
         GoogleCredentials credentials = GoogleCredentials.getApplicationDefault();
         if (config.credentialsFilePath() != null) {
             credentials =
@@ -49,7 +48,7 @@ public class PubSubEventListener implements EventListener, AutoCloseable {
                         .setEnableCompression(true)
                         .build();
 
-        return new PubSubEventListener(config, publisher, logger);
+        return new PubSubEventListener(config, publisher);
     }
 
     @Override
@@ -85,17 +84,17 @@ public class PubSubEventListener implements EventListener, AutoCloseable {
                     future,
                     new ApiFutureCallback<String>() {
                         public void onSuccess(String id) {
-                            logger.debug("published event with id: " + id);
+                            LOG.log(Level.ALL, "published event with id: " + id);
                         }
 
                         public void onFailure(Throwable t) {
-                            logger.error("Failed to publish event", t);
+                            LOG.log(Level.SEVERE, "Failed to publish event", t);
                         }
                     },
                     MoreExecutors.directExecutor());
 
         } catch (Exception e) {
-            logger.error("Failed to publish", e);
+            LOG.log(Level.SEVERE, "Failed to publish", e);
         }
     }
 
@@ -107,7 +106,7 @@ public class PubSubEventListener implements EventListener, AutoCloseable {
             try {
                 publisher.awaitTermination(60, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
-                logger.error("Failed to shutdown publisher", e);
+                LOG.log(Level.SEVERE, "Failed to shutdown publisher", e);
             }
         }
     }

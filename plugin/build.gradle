@@ -12,10 +12,6 @@ repositories {
 
 
 dependencies {
-    def log4jVersion = '2.20.0'
-    implementation "org.apache.logging.log4j:log4j-api:${log4jVersion}"
-    implementation "org.apache.logging.log4j:log4j-core:${log4jVersion}"
-
     def autoValueVersion = '1.10.1'
     compileOnly         "com.google.auto.value:auto-value-annotations:${autoValueVersion}"
     annotationProcessor "com.google.auto.value:auto-value:${autoValueVersion}"
