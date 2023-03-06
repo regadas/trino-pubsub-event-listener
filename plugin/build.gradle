@@ -2,6 +2,7 @@ plugins {
     // Apply the java-library plugin for API and implementation separation.
     id 'java-library'
     id 'com.diffplug.spotless' version "6.16.0"
+    id 'distribution'
 }
 
 repositories {
@@ -50,4 +51,14 @@ spotless {
     // fix formatting of type annotations
     formatAnnotations()
   }
+}
+
+distributions {
+    main {
+        distributionBaseName = 'trino-pubsub-event-listener'
+        contents {
+            from jar
+            from configurations.runtimeClasspath
+        }
+    }
 }
