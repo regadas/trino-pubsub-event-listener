@@ -1,1 +1,1 @@
-# trino-pubsub-listener
+# trino-pubsub-event-listener

@@ -10,14 +10,24 @@ repositories {
     mavenCentral()
 }
 
-dependencies {
-    // This dependency is exported to consumers, that is to say found on their compile classpath.
-    api 'org.apache.commons:commons-math3:3.6.1'
-    implementation 'io.trino:trino-spi:407'
-    implementation 'io.trino:trino-plugin-toolkit:407'
 
-    // This dependency is used internally, and not exposed to consumers on their own compile classpath.
-    implementation 'com.google.guava:guava:31.1-jre'
+dependencies {
+    def log4jVersion = '2.20.0'
+    implementation "org.apache.logging.log4j:log4j-api:${log4jVersion}"
+    implementation "org.apache.logging.log4j:log4j-core:${log4jVersion}"
+
+    def autoValueVersion = '1.10.1'
+    compileOnly         "com.google.auto.value:auto-value-annotations:${autoValueVersion}"
+    annotationProcessor "com.google.auto.value:auto-value:${autoValueVersion}"
+
+    def trinoVersion = '409'
+    compileOnly "io.trino:trino-spi:${trinoVersion}"
+    compileOnly "io.trino:trino-plugin-toolkit:${trinoVersion}"
+
+    implementation platform('com.google.cloud:libraries-bom:26.9.0')
+    implementation 'com.google.cloud:google-cloud-pubsub'
+
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.14.2'
 }
 
 testing {

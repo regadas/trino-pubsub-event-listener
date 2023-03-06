@@ -8,5 +8,5 @@
  * This project uses @Incubating APIs which are subject to change.
  */
 
-rootProject.name = 'trino-pubsub-listener'
+rootProject.name = 'trino-pubsub-event-listener'
 include('plugin')
