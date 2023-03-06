@@ -6,6 +6,7 @@ import com.google.auto.value.AutoValue;
 import com.google.pubsub.v1.TopicName;
 import java.util.Map;
 import java.util.Optional;
+import javax.annotation.Nullable;
 
 @AutoValue
 public abstract class PubSubEventListenerConfig {
@@ -26,7 +27,7 @@ public abstract class PubSubEventListenerConfig {
 
     public abstract String topicId();
 
-    public abstract String credentialsFilePath();
+    @Nullable public abstract String credentialsFilePath();
 
     public TopicName getTopicName() {
         return TopicName.of(projectId(), topicId());
@@ -44,7 +45,7 @@ public abstract class PubSubEventListenerConfig {
 
         public abstract Builder topicId(String topicId);
 
-        public abstract Builder credentialsFilePath(String credentialsFilePath);
+        public abstract Builder credentialsFilePath(@Nullable String credentialsFilePath);
 
         public abstract PubSubEventListenerConfig build();
     }
