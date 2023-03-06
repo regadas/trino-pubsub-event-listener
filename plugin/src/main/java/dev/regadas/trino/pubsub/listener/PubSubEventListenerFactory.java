@@ -15,8 +15,8 @@ public class PubSubEventListenerFactory implements EventListenerFactory {
     @Override
     public EventListener create(Map<String, String> config) {
         var listenerConfig = PubSubEventListenerConfig.create(config);
-        try (var listener = PubSubEventListener.create(listenerConfig)) {
-            return listener;
+        try {
+            return PubSubEventListener.create(listenerConfig);
         } catch (IOException e) {
             throw new RuntimeException("Failed to create PubSubEventListener", e);
         }
