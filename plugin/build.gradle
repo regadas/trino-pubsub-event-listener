@@ -18,12 +18,12 @@ dependencies {
 
     def trinoVersion = '409'
     compileOnly "io.trino:trino-spi:${trinoVersion}"
-    compileOnly "io.trino:trino-plugin-toolkit:${trinoVersion}"
 
     implementation platform('com.google.cloud:libraries-bom:26.9.0')
     implementation 'com.google.cloud:google-cloud-pubsub'
 
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.14.2'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.14.2'
 }
 
 testing {
