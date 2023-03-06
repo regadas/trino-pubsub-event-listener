@@ -23,7 +23,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class PubSubEventListener implements EventListener, AutoCloseable {
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = new ObjectMapper().findAndRegisterModules();
     private static final Logger LOG =
             Logger.getLogger(PubSubEventListener.class.getPackage().getName());
 
