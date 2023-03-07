@@ -22,8 +22,10 @@ dependencies {
     implementation platform('com.google.cloud:libraries-bom:26.9.0')
     implementation 'com.google.cloud:google-cloud-pubsub'
 
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.14.2'
-    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.14.2'
+    def jacksonVersion = '2.14.2'
+    implementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
+    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonVersion}"
+    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:${jacksonVersion}"
 }
 
 testing {
