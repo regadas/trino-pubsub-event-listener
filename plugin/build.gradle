@@ -22,15 +22,6 @@ dependencies {
 
     implementation platform('com.google.cloud:libraries-bom:26.9.0')
     implementation 'com.google.cloud:google-cloud-pubsub'
-
-    // def protobufVersion = '3.22.1'
-    // implementation "com.google.protobuf:protobuf-java:${protobufVersion}"
-    // implementation "com.google.protobuf:protobuf-java-util:${protobufVersion}"
-
-    def jacksonVersion = '2.14.2'
-    implementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
-    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonVersion}"
-    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:${jacksonVersion}"
 }
 
 testing {
