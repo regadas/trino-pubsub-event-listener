@@ -52,34 +52,30 @@ public class PubSubEventListener implements EventListener, AutoCloseable {
     }
 
     @Override
-    public void queryCreated(QueryCreatedEvent queryCreatedEvent) {
+    public void queryCreated(QueryCreatedEvent event) {
         if (config.trackQueryCreatedEvent()) {
-            publish(queryCreatedEvent);
+            publish(SchemaHelpers.from(event).toByteString());
         }
     }
 
     @Override
-    public void queryCompleted(QueryCompletedEvent queryCompletedEvent) {
+    public void queryCompleted(QueryCompletedEvent event) {
         if (config.trackQueryCompletedEvent()) {
-            publish(queryCompletedEvent);
+            publish(SchemaHelpers.from(event).toByteString());
         }
     }
 
     @Override
-    public void splitCompleted(SplitCompletedEvent splitCompletedEvent) {
+    public void splitCompleted(SplitCompletedEvent event) {
         if (config.trackSplitCompletedEvent()) {
-            publish(splitCompletedEvent);
+            publish(SchemaHelpers.from(event).toByteString());
         }
     }
 
-    <T> PubsubMessage buildMessage(T event) throws JsonProcessingException {
-        var eventBytes = MAPPER.writeValueAsBytes(event);
-        return PubsubMessage.newBuilder().setData(ByteString.copyFrom(eventBytes)).build();
-    }
-
-    <T> void publish(T event) {
+    void publish(ByteString event) {
         try {
-            var future = publisher.publish(buildMessage(event));
+            var message = PubsubMessage.newBuilder().setData(event).build();
+            var future = publisher.publish(message);
             ApiFutures.addCallback(
                     future,
                     new ApiFutureCallback<String>() {

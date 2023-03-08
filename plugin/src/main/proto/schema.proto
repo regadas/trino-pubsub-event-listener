@@ -1,0 +1,266 @@
+syntax = "proto3";
+package dev.regadas.trino.pubsub.listener.proto;
+
+import "google/protobuf/duration.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/Any.proto";
+
+message QueryCreatedEvent {
+  QueryMetadata metadata = 1;
+  QueryContext context = 2;
+}
+
+message QueryCompletedEvent {
+  QueryMetadata metadata = 1;
+  QueryStatistics statistics = 2;
+  QueryContext context = 3;
+  QueryIOMetadata io_metadata = 4;
+  QueryFailureInfo failure_info = 5;
+  repeated TrinoWarning warnings = 6;
+  google.protobuf.Timestamp create_time = 7;
+  google.protobuf.Timestamp execution_start_time = 8;
+  google.protobuf.Timestamp end_time = 9;
+}
+
+message TrinoWarning {
+  message Code {
+    int32 code = 1;
+    string name = 2;
+  }
+
+  Code warning_code = 1;
+  string message = 2;
+}
+
+message QueryFailureInfo {
+  ErrorCode errorCode = 1;
+  string failure_type = 2;
+  string failure_message = 3;
+  string failure_task = 4;
+  string failure_host = 5;
+  string failures_json = 6;
+}
+
+message ErrorCode {
+  int32 code = 1;
+  string name = 2;
+  string type = 3;
+}
+
+message QueryIOMetadata {
+  repeated string input_tables = 1;
+  repeated string output_tables = 2;
+  repeated string input_schemas = 3;
+  repeated string output_schemas = 4;
+  repeated string input_catalogs = 5;
+  repeated string output_catalogs = 6;
+}
+
+message QueryInputMetadata {
+  string catalog_name = 1;
+  string schema = 2;
+  string table = 3;
+  repeated string columns = 4;
+  google.protobuf.Any connector_info = 5;
+  string connector_metrics = 6;
+  int64 physical_input_bytes = 7;
+  int64 physical_input_rows = 8;
+}
+
+message QueryOutputMetadata {
+  string catalog_name = 1;
+  string schema = 2;
+  string table = 3;
+  repeated string columns = 4;
+  repeated OutputColumnMetadata connector_metrics = 5;
+  string connector_output_metadata = 6;
+  bool json_length_limit_exceeded = 7;
+}
+
+message OutputColumnMetadata {
+  string column_name = 1;
+  string column_type = 2;
+  repeated ColumnDetail source_columns = 3;
+}
+
+message ColumnDetail {
+  string catalog = 1;
+  string schema = 2;
+  string table = 3;
+  string column_name = 4;
+}
+
+message QueryMetadata {
+  string query_id = 1;
+  string transaction_id = 2;
+  string query = 3;
+  string update_type = 4;
+  string prepared_query = 5;
+  string query_state = 6;
+  string uri = 7;
+  repeated TableInfo tables = 8;
+  repeated RoutineInfo routines = 9;
+  string plan = 10;
+  string json_plan = 11;
+  string payload = 12;
+}
+
+message RoutineInfo {
+  string routine = 1;
+  string authorization = 2;
+}
+
+message TableInfo {
+  string catalog = 1;
+  string schema = 2;
+  string table = 3;
+  string authorization = 4;
+  repeated string filters = 5;
+  repeated ColumnInfo columns = 6;
+  bool directly_referenced = 7;
+}
+
+message ColumnInfo {
+  string column = 1;
+  string mask = 2;
+}
+
+message QueryStatistics {
+  google.protobuf.Duration cpu_time = 1;
+  google.protobuf.Duration failed_cpu_time = 2;
+  google.protobuf.Duration wall_time = 3;
+  google.protobuf.Duration queued_time = 4;
+  google.protobuf.Duration scheduled_time = 5;
+  google.protobuf.Duration failed_scheduled_time = 6;
+  google.protobuf.Duration resource_waiting_time = 7;
+  google.protobuf.Duration analysis_time = 8;
+  google.protobuf.Duration planning_time = 9;
+  google.protobuf.Duration execution_time = 10;
+  google.protobuf.Duration input_blocked_time = 11;
+  google.protobuf.Duration failed_input_blocked_time = 12;
+  google.protobuf.Duration output_blocked_time = 13;
+  google.protobuf.Duration failed_output_blocked_time = 14;
+  google.protobuf.Duration physical_input_read_time = 15;
+  int64 peak_user_memory_bytes = 16;
+  int64 peak_task_user_memory = 17;
+  int64 peak_task_total_memory = 18;
+  int64 physical_input_bytes = 19;
+  int64 physical_input_rows = 20;
+  int64 processed_input_bytes = 21;
+  int64 processed_input_rows = 22;
+  int64 internal_network_bytes = 23;
+  int64 internal_network_rows = 24;
+  int64 total_bytes = 25;
+  int64 total_rows = 26;
+  int64 output_bytes = 27;
+  int64 output_rows = 28;
+  int64 written_bytes = 29;
+  int64 written_rows = 30;
+  double cumulative_memory = 31;
+  double failed_cumulative_memory = 32;
+  repeated StageGcStatistics stage_gc_statistics = 33;
+  int32 completed_splits = 34;
+  bool complete = 35;
+  repeated CpuTimeDistribution cpu_time_distribution = 36;
+  repeated OutputBufferUtilization output_buffer_utilization = 37;
+  repeated string operator_summaries = 38;
+}
+
+message StageGcStatistics {
+  int32 stage_id = 1;
+  int32 tasks = 2;
+  int32 full_gc_tasks = 3;
+  int32 min_full_gc_sec = 4;
+  int32 max_full_gc_sec = 5;
+  int32 total_full_gc_sec = 6;
+  float average_full_gc_sec = 7;
+}
+
+message CpuTimeDistribution {
+  int32 stage_id = 1;
+  int32 tasks = 2;
+  int64 p25 = 3;
+  int64 p50 = 4;
+  int64 p75 = 5;
+  int64 p90 = 6;
+  int64 p95 = 7;
+  int64 p99 = 8;
+  int64 min = 9;
+  int64 max = 10;
+  int64 total = 11;
+  double average = 12;
+}
+
+message OutputBufferUtilization {
+  int32 stage_id = 1;
+  int32 tasks = 2;
+  double p25 = 3;
+  double p50 = 4;
+  double p75 = 5;
+  double p90 = 6;
+  double p95 = 7;
+  double p99 = 8;
+  double min = 9;
+  double max = 10;
+  google.protobuf.Duration duration = 11;
+}
+
+message QueryContext {
+  string user = 1;
+  string principal = 2;
+  repeated string groups = 3;
+  string trace_token = 4;
+  string remote_client_address = 5;
+  string user_agent = 6;
+  string client_info = 7;
+  repeated string client_tags = 8;
+  repeated string client_capabilities = 9;
+  string source = 10;
+  string catalog = 11;
+  string schema = 12;
+  string resource_group_id = 13;
+  map<string, string> session_properties = 14;
+  ResourceEstimates resource_estimates = 15;
+  string server_address = 16;
+  string server_version = 17;
+  string environment = 18;
+  string query_type = 19;
+  string retry_policy = 20;
+}
+
+message ResourceEstimates {
+  google.protobuf.Duration execution_time = 1;
+  google.protobuf.Duration cpu_time = 2;
+  int64 peak_memory_bytes = 3;
+}
+
+message SplitCompletedEvent {
+  string query_id = 1;
+  string stage_id = 2;
+  string task_id = 3;
+  string catalog_name = 4;
+  google.protobuf.Timestamp create_time = 5;
+  google.protobuf.Timestamp start_time = 6;
+  google.protobuf.Timestamp end_time = 7;
+  SplitStatistics statistics = 8;
+  SplitFailureInfo failure_info = 9;
+  string payload = 10;
+}
+
+message SplitStatistics {
+  google.protobuf.Duration cpu_time = 1;
+  google.protobuf.Duration wall_time = 2;
+  google.protobuf.Duration queued_time = 3;
+  google.protobuf.Duration completed_read_time = 4;
+
+  int64 completed_positions = 5;
+  int64 completed_data_size_bytes = 6;
+
+  google.protobuf.Duration time_to_first_byte = 7;
+  google.protobuf.Duration time_to_last_byte = 8;
+}
+
+message SplitFailureInfo {
+  string failure_type = 1;
+  string failure_message = 2;
+}
