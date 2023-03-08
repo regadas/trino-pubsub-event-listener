@@ -16,6 +16,12 @@ public abstract class PubSubEventListenerConfig {
     private static final String PUBSUB_TRACK_COMPLETED_SPLIT = "pubsub-event-listener.log-split";
     private static final String PUBSUB_PROJECT_ID = "pubsub-event-listener.project-id";
     private static final String PUBSUB_TOPIC_ID = "pubsub-event-listener.topic-id";
+    private static final String PUBSUB_FORMAT = "pubsub-event-listener.message-format";
+
+    enum MessageFormat {
+        JSON,
+        PROTO
+    }
 
     public abstract boolean trackQueryCreatedEvent();
 
@@ -28,6 +34,8 @@ public abstract class PubSubEventListenerConfig {
     public abstract String topicId();
 
     @Nullable public abstract String credentialsFilePath();
+
+    public abstract MessageFormat messageFormat();
 
     public TopicName getTopicName() {
         return TopicName.of(projectId(), topicId());
@@ -47,6 +55,8 @@ public abstract class PubSubEventListenerConfig {
 
         public abstract Builder credentialsFilePath(@Nullable String credentialsFilePath);
 
+        public abstract Builder messageFormat(MessageFormat messageFormat);
+
         public abstract PubSubEventListenerConfig build();
     }
 
@@ -63,6 +73,8 @@ public abstract class PubSubEventListenerConfig {
         var projectId = requireNonNull(config.get(PUBSUB_PROJECT_ID));
         var topicId = requireNonNull(config.get(PUBSUB_TOPIC_ID));
         var credentialsFilePath = config.get(PUBSUB_CREDENTIALS_FILE);
+        var messageFormatConfig = config.getOrDefault(PUBSUB_FORMAT, MessageFormat.JSON.name());
+        var messageFormat = MessageFormat.valueOf(messageFormatConfig.toUpperCase());
 
         return builder()
                 .trackQueryCreatedEvent(trackQueryCreatedEvent)
@@ -71,6 +83,7 @@ public abstract class PubSubEventListenerConfig {
                 .projectId(projectId)
                 .topicId(topicId)
                 .credentialsFilePath(credentialsFilePath)
+                .messageFormat(messageFormat)
                 .build();
     }
 

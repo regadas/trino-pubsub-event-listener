@@ -2,8 +2,6 @@ package dev.regadas.trino.pubsub.listener;
 
 import static java.util.Objects.requireNonNull;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.core.ApiFutureCallback;
 import com.google.api.core.ApiFutures;
 import com.google.api.gax.core.FixedCredentialsProvider;
@@ -11,6 +9,8 @@ import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.pubsub.v1.Publisher;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.Message;
+import com.google.protobuf.util.JsonFormat;
 import com.google.pubsub.v1.PubsubMessage;
 import io.trino.spi.eventlistener.EventListener;
 import io.trino.spi.eventlistener.QueryCompletedEvent;
@@ -23,7 +23,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class PubSubEventListener implements EventListener, AutoCloseable {
-    private static final ObjectMapper MAPPER = new ObjectMapper().findAndRegisterModules();
+    private static final JsonFormat.Printer JSON_PRINTER = JsonFormat.printer();
     private static final Logger LOG =
             Logger.getLogger(PubSubEventListener.class.getPackage().getName());
 
@@ -54,27 +54,40 @@ public class PubSubEventListener implements EventListener, AutoCloseable {
     @Override
     public void queryCreated(QueryCreatedEvent event) {
         if (config.trackQueryCreatedEvent()) {
-            publish(SchemaHelpers.from(event).toByteString());
+            publish(SchemaHelpers.from(event));
         }
     }
 
     @Override
     public void queryCompleted(QueryCompletedEvent event) {
         if (config.trackQueryCompletedEvent()) {
-            publish(SchemaHelpers.from(event).toByteString());
+            publish(SchemaHelpers.from(event));
         }
     }
 
     @Override
     public void splitCompleted(SplitCompletedEvent event) {
         if (config.trackSplitCompletedEvent()) {
-            publish(SchemaHelpers.from(event).toByteString());
+            publish(SchemaHelpers.from(event));
         }
     }
 
-    void publish(ByteString event) {
+    void publish(Message event) {
         try {
-            var message = PubsubMessage.newBuilder().setData(event).build();
+            ByteString eventByteString;
+
+            switch (config.messageFormat()) {
+                case JSON:
+                    eventByteString = ByteString.copyFromUtf8(JSON_PRINTER.print(event));
+                    break;
+                case PROTO:
+                    eventByteString = event.toByteString();
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown message format");
+            }
+
+            var message = PubsubMessage.newBuilder().setData(eventByteString).build();
             var future = publisher.publish(message);
             ApiFutures.addCallback(
                     future,
