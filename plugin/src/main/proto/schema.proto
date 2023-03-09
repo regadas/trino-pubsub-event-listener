@@ -3,7 +3,7 @@ package dev.regadas.trino.pubsub.listener.proto;
 
 import "google/protobuf/duration.proto";
 import "google/protobuf/timestamp.proto";
-import "google/protobuf/Any.proto";
+import "google/protobuf/any.proto";
 
 message QueryCreatedEvent {
   QueryMetadata metadata = 1;
