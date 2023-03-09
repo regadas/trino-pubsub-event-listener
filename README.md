@@ -6,11 +6,11 @@ Trino Pub/Sub event listener is a plugin for [Trino](https://trino.io/) that all
 
 ## Usage
 
-To use this plugin you need to copy the distribution package to the Trino plugin (<path_to_trino>/plugin/pubsub-event-listener/) directory and configure the plugin.
+To use this plugin you need to copy the distribution package to the Trino plugin (`<path_to_trino>/plugin/pubsub-event-listener/`) directory and configure the plugin.
 
 ### Configuration
 
-Create <path_to_trino>/etc/pubsub-event-listener.properties with the following required parameters, e.g.:
+Create `<path_to_trino>/etc/pubsub-event-listener.properties` with the following required parameters, e.g.:
 
 ```properties
 event-listener.name=pubsub
