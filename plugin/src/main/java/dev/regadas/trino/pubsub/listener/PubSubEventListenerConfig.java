@@ -2,14 +2,19 @@ package dev.regadas.trino.pubsub.listener;
 
 import static java.util.Objects.requireNonNull;
 
-import com.google.auto.value.AutoValue;
+import com.google.auto.value.AutoBuilder;
 import com.google.pubsub.v1.TopicName;
 import java.util.Map;
 import java.util.Optional;
-import javax.annotation.Nullable;
 
-@AutoValue
-public abstract class PubSubEventListenerConfig {
+public record PubSubEventListenerConfig(
+        boolean trackQueryCreatedEvent,
+        boolean trackQueryCompletedEvent,
+        boolean trackSplitCompletedEvent,
+        String projectId,
+        String topicId,
+        String credentialsFilePath,
+        PubSubEventListenerConfig.MessageFormat messageFormat) {
     private static final String PUBSUB_CREDENTIALS_FILE = "pubsub-event-listener.credentials-file";
     private static final String PUBSUB_TRACK_CREATED = "pubsub-event-listener.log-created";
     private static final String PUBSUB_TRACK_COMPLETED = "pubsub-event-listener.log-completed";
@@ -23,45 +28,36 @@ public abstract class PubSubEventListenerConfig {
         PROTO
     }
 
-    public abstract boolean trackQueryCreatedEvent();
+    public PubSubEventListenerConfig {
+        requireNonNull(projectId, "projectId is null");
+        requireNonNull(topicId, "topicId is null");
+    }
 
-    public abstract boolean trackQueryCompletedEvent();
-
-    public abstract boolean trackSplitCompletedEvent();
-
-    public abstract String projectId();
-
-    public abstract String topicId();
-
-    @Nullable public abstract String credentialsFilePath();
-
-    public abstract MessageFormat messageFormat();
-
-    public TopicName getTopicName() {
+    public TopicName topicName() {
         return TopicName.of(projectId(), topicId());
     }
 
-    @AutoValue.Builder
-    public abstract static class Builder {
-        public abstract Builder trackQueryCreatedEvent(boolean trackQueryCreatedEvent);
+    @AutoBuilder
+    public interface Builder {
+        Builder trackQueryCreatedEvent(boolean trackQueryCreatedEvent);
 
-        public abstract Builder trackQueryCompletedEvent(boolean trackQueryCompletedEvent);
+        Builder trackQueryCompletedEvent(boolean trackQueryCompletedEvent);
 
-        public abstract Builder trackSplitCompletedEvent(boolean trackSplitCompletedEvent);
+        Builder trackSplitCompletedEvent(boolean trackSplitCompletedEvent);
 
-        public abstract Builder projectId(String projectId);
+        Builder projectId(String projectId);
 
-        public abstract Builder topicId(String topicId);
+        Builder topicId(String topicId);
 
-        public abstract Builder credentialsFilePath(@Nullable String credentialsFilePath);
+        Builder credentialsFilePath(String credentialsFilePath);
 
-        public abstract Builder messageFormat(MessageFormat messageFormat);
+        Builder messageFormat(MessageFormat messageFormat);
 
-        public abstract PubSubEventListenerConfig build();
+        PubSubEventListenerConfig build();
     }
 
     public static final Builder builder() {
-        return new AutoValue_PubSubEventListenerConfig.Builder();
+        return new AutoBuilder_PubSubEventListenerConfig_Builder();
     }
 
     public static final PubSubEventListenerConfig create(Map<String, String> config) {
@@ -70,8 +66,8 @@ public abstract class PubSubEventListenerConfig {
                 getBooleanConfig(config, PUBSUB_TRACK_COMPLETED).orElse(false);
         var trackSplitCompletedEvent =
                 getBooleanConfig(config, PUBSUB_TRACK_COMPLETED_SPLIT).orElse(false);
-        var projectId = requireNonNull(config.get(PUBSUB_PROJECT_ID));
-        var topicId = requireNonNull(config.get(PUBSUB_TOPIC_ID));
+        var projectId = config.get(PUBSUB_PROJECT_ID);
+        var topicId = config.get(PUBSUB_TOPIC_ID);
         var credentialsFilePath = config.get(PUBSUB_CREDENTIALS_FILE);
         var messageFormatConfig = config.getOrDefault(PUBSUB_FORMAT, MessageFormat.JSON.name());
         var messageFormat = MessageFormat.valueOf(messageFormatConfig.toUpperCase());

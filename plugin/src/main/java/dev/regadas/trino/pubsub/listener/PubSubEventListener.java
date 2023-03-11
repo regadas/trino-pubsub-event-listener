@@ -43,7 +43,7 @@ public class PubSubEventListener implements EventListener, AutoCloseable {
         }
 
         var publisher =
-                Publisher.newBuilder(config.getTopicName())
+                Publisher.newBuilder(config.topicName())
                         .setCredentialsProvider(FixedCredentialsProvider.create(credentials))
                         .setEnableCompression(true)
                         .build();
