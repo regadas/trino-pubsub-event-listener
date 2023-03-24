@@ -15,7 +15,7 @@ dependencies {
     def trinoVersion = '410'
     compileOnly "io.trino:trino-spi:${trinoVersion}"
 
-    implementation platform('com.google.cloud:libraries-bom:26.10.0')
+    implementation platform('com.google.cloud:libraries-bom:26.11.0')
     implementation 'com.google.cloud:google-cloud-pubsub'
 }
 
