@@ -1,10 +1,12 @@
 package dev.regadas.trino.pubsub.listener;
 
 import static io.trino.spi.StandardErrorCode.GENERIC_INTERNAL_ERROR;
+
 import static java.lang.Boolean.TRUE;
 import static java.time.Duration.ofMillis;
 
 import com.google.common.collect.ImmutableMap;
+
 import io.trino.spi.TrinoWarning;
 import io.trino.spi.connector.StandardWarningCode;
 import io.trino.spi.eventlistener.ColumnDetail;
@@ -21,6 +23,7 @@ import io.trino.spi.metrics.Metrics;
 import io.trino.spi.resourcegroups.QueryType;
 import io.trino.spi.resourcegroups.ResourceGroupId;
 import io.trino.spi.session.ResourceEstimates;
+
 import java.net.URI;
 import java.time.Instant;
 import java.util.Collections;
@@ -39,9 +42,7 @@ class TestData {
                     Optional.of("updateType"),
                     Optional.of("preparedQuery"),
                     "queryState",
-                    // not stored
                     List.of(),
-                    // not stored
                     List.of(),
                     URI.create("http://localhost"),
                     Optional.of("plan"),
@@ -83,17 +84,13 @@ class TestData {
                     1271L,
                     128.0,
                     129.0,
-                    // not stored
                     Collections.emptyList(),
                     130,
                     true,
-                    // not stored
                     Collections.emptyList(),
-                    // not stored
                     Collections.emptyList(),
-                    // not stored
                     List.of("{operator: \"operator1\"}", "{operator: \"operator2\"}"),
-                    // not stored
+                    Collections.emptyList(),
                     Optional.empty());
 
     public static final QueryContext FULL_QUERY_CONTEXT =
@@ -106,14 +103,12 @@ class TestData {
                     Optional.of("userAgent"),
                     Optional.of("clientInfo"),
                     Set.of("tag1", "tag2", "tag3"),
-                    // not stored
                     Set.of(),
                     Optional.of("source"),
                     Optional.of("catalog"),
                     Optional.of("schema"),
                     Optional.of(new ResourceGroupId("resourceGroup")),
                     Map.of("property1", "value1", "property2", "value2"),
-                    // not stored
                     new ResourceEstimates(Optional.empty(), Optional.empty(), Optional.empty()),
                     "serverAddress",
                     "serverVersion",
@@ -194,9 +189,7 @@ class TestData {
                     Optional.empty(),
                     Optional.empty(),
                     "queryState",
-                    // not stored
                     List.of(),
-                    // not stored
                     List.of(),
                     URI.create("http://localhost"),
                     Optional.empty(),
@@ -238,16 +231,13 @@ class TestData {
                     1271L,
                     128.0,
                     129.0,
-                    // not stored
                     Collections.emptyList(),
                     130,
                     false,
-                    // not stored
-                    Collections.emptyList(),
-                    // not stored
                     Collections.emptyList(),
                     Collections.emptyList(),
-                    // not stored
+                    Collections.emptyList(),
+                    Collections.emptyList(),
                     Optional.empty());
 
     public static final QueryContext MINIMAL_QUERY_CONTEXT =
@@ -260,14 +250,12 @@ class TestData {
                     Optional.empty(),
                     Optional.empty(),
                     Set.of(),
-                    // not stored
                     Set.of(),
                     Optional.empty(),
                     Optional.empty(),
                     Optional.empty(),
                     Optional.empty(),
                     Map.of(),
-                    // not stored
                     new ResourceEstimates(Optional.empty(), Optional.empty(), Optional.empty()),
                     "serverAddress",
                     "serverVersion",
