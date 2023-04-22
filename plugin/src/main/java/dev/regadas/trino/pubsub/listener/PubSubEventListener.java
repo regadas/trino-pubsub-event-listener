@@ -27,7 +27,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public final class PubSubEventListener implements EventListener, AutoCloseable {
-    private static final JsonFormat.Printer JSON_PRINTER = JsonFormat.printer();
     private static final Logger LOG =
             Logger.getLogger(PubSubEventListener.class.getPackage().getName());
 
