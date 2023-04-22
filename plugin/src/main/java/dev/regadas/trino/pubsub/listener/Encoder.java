@@ -1,6 +1,5 @@
 package dev.regadas.trino.pubsub.listener;
 
-import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import com.google.protobuf.util.JsonFormat;
 
@@ -38,7 +37,7 @@ public interface Encoder<T> {
                 public byte[] encode(Message value) throws Exception {
                     switch (encoding) {
                         case JSON:
-                            return ByteString.copyFromUtf8(JSON_PRINTER.print(value)).toByteArray();
+                            return JSON_PRINTER.print(value).getBytes("UTF-8");
                         case PROTO:
                             return value.toByteArray();
                         default:
