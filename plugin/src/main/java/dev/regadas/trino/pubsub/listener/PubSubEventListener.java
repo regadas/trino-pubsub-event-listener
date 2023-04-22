@@ -84,7 +84,7 @@ public final class PubSubEventListener implements EventListener, AutoCloseable {
         try {
             var data = encoder.encode(event);
             var message = PubsubMessage.newBuilder().setData(ByteString.copyFrom(data)).build();
-            
+
             var future = publisher.publish(message);
 
             ApiFutures.addCallback(
