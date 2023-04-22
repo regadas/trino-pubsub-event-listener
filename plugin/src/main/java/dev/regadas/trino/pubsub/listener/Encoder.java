@@ -33,22 +33,19 @@ public interface Encoder<T> {
         static final JsonFormat.Printer JSON_PRINTER = JsonFormat.printer();
 
         static MessageEncoder create(Encoding encoding) {
-            return (MessageEncoder)
-                    new Encoder<Message>() {
-                        @Override
-                        public byte[] encode(Message value) throws Exception {
-                            switch (encoding) {
-                                case JSON:
-                                    return ByteString.copyFromUtf8(JSON_PRINTER.print(value))
-                                            .toByteArray();
-                                case PROTO:
-                                    return value.toByteArray();
-                                default:
-                                    throw new IllegalArgumentException(
-                                            "Unknown encoding: " + encoding);
-                            }
-                        }
-                    };
+            return new MessageEncoder() {
+                @Override
+                public byte[] encode(Message value) throws Exception {
+                    switch (encoding) {
+                        case JSON:
+                            return ByteString.copyFromUtf8(JSON_PRINTER.print(value)).toByteArray();
+                        case PROTO:
+                            return value.toByteArray();
+                        default:
+                            throw new IllegalArgumentException("Unknown encoding: " + encoding);
+                    }
+                }
+            };
         }
     }
 }
