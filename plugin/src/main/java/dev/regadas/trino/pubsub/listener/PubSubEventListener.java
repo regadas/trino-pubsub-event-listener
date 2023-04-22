@@ -13,6 +13,8 @@ import com.google.protobuf.Message;
 import com.google.protobuf.util.JsonFormat;
 import com.google.pubsub.v1.PubsubMessage;
 
+import dev.regadas.trino.pubsub.listener.Encoder.MessageEncoder;
+
 import io.trino.spi.eventlistener.EventListener;
 import io.trino.spi.eventlistener.QueryCompletedEvent;
 import io.trino.spi.eventlistener.QueryCreatedEvent;
@@ -31,10 +33,13 @@ public final class PubSubEventListener implements EventListener, AutoCloseable {
 
     private final PubSubEventListenerConfig config;
     private final Publisher publisher;
+    private final Encoder<Message> encoder;
 
-    PubSubEventListener(PubSubEventListenerConfig config, Publisher publisher) {
+    PubSubEventListener(
+            PubSubEventListenerConfig config, Publisher publisher, Encoder<Message> encoder) {
         this.config = requireNonNull(config, "config is null");
         this.publisher = requireNonNull(publisher, "publisher is null");
+        this.encoder = requireNonNull(encoder, "encoder is null");
     }
 
     public static PubSubEventListener create(PubSubEventListenerConfig config) throws IOException {
@@ -50,7 +55,8 @@ public final class PubSubEventListener implements EventListener, AutoCloseable {
                         .setEnableCompression(true)
                         .build();
 
-        return new PubSubEventListener(config, publisher);
+        var encoder = MessageEncoder.create(config.encoding());
+        return new PubSubEventListener(config, publisher, encoder);
     }
 
     @Override
@@ -76,21 +82,11 @@ public final class PubSubEventListener implements EventListener, AutoCloseable {
 
     void publish(Message event) {
         try {
-            ByteString eventByteString;
+            var data = encoder.encode(event);
+            var message = PubsubMessage.newBuilder().setData(ByteString.copyFrom(data)).build();
 
-            switch (config.encoding()) {
-                case JSON:
-                    eventByteString = ByteString.copyFromUtf8(JSON_PRINTER.print(event));
-                    break;
-                case PROTO:
-                    eventByteString = event.toByteString();
-                    break;
-                default:
-                    throw new IllegalArgumentException("Unknown message format");
-            }
-
-            var message = PubsubMessage.newBuilder().setData(eventByteString).build();
             var future = publisher.publish(message);
+
             ApiFutures.addCallback(
                     future,
                     new ApiFutureCallback<String>() {
