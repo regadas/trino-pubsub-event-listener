@@ -12,17 +12,19 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import com.google.protobuf.util.JsonFormat;
 import com.google.pubsub.v1.PubsubMessage;
+
 import io.trino.spi.eventlistener.EventListener;
 import io.trino.spi.eventlistener.QueryCompletedEvent;
 import io.trino.spi.eventlistener.QueryCreatedEvent;
 import io.trino.spi.eventlistener.SplitCompletedEvent;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class PubSubEventListener implements EventListener, AutoCloseable {
+public final class PubSubEventListener implements EventListener, AutoCloseable {
     private static final JsonFormat.Printer JSON_PRINTER = JsonFormat.printer();
     private static final Logger LOG =
             Logger.getLogger(PubSubEventListener.class.getPackage().getName());
@@ -76,7 +78,7 @@ public class PubSubEventListener implements EventListener, AutoCloseable {
         try {
             ByteString eventByteString;
 
-            switch (config.messageFormat()) {
+            switch (config.encoding()) {
                 case JSON:
                     eventByteString = ByteString.copyFromUtf8(JSON_PRINTER.print(event));
                     break;

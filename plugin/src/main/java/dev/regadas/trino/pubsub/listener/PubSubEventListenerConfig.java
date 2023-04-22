@@ -4,6 +4,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.auto.value.AutoBuilder;
 import com.google.pubsub.v1.TopicName;
+
 import java.util.Map;
 import java.util.Optional;
 
@@ -14,18 +15,30 @@ public record PubSubEventListenerConfig(
         String projectId,
         String topicId,
         String credentialsFilePath,
-        PubSubEventListenerConfig.MessageFormat messageFormat) {
+        PubSubEventListenerConfig.Encoding encoding) {
     private static final String PUBSUB_CREDENTIALS_FILE = "pubsub-event-listener.credentials-file";
     private static final String PUBSUB_TRACK_CREATED = "pubsub-event-listener.log-created";
     private static final String PUBSUB_TRACK_COMPLETED = "pubsub-event-listener.log-completed";
     private static final String PUBSUB_TRACK_COMPLETED_SPLIT = "pubsub-event-listener.log-split";
     private static final String PUBSUB_PROJECT_ID = "pubsub-event-listener.project-id";
     private static final String PUBSUB_TOPIC_ID = "pubsub-event-listener.topic-id";
-    private static final String PUBSUB_FORMAT = "pubsub-event-listener.message-format";
+    private static final String PUBSUB_ENCODING = "pubsub-event-listener.encoding";
 
-    enum MessageFormat {
+    enum Encoding {
         JSON,
-        PROTO
+        PROTO;
+
+        public static Optional<Encoding> from(String encoding) {
+            if (encoding == null) {
+                return Optional.empty();
+            }
+
+            return Optional.of(Encoding.valueOf(encoding.toUpperCase()));
+        }
+
+        public static Encoding fromOrDefault(String encoding, Encoding defaultEncoding) {
+            return from(encoding).orElse(defaultEncoding);
+        }
     }
 
     public PubSubEventListenerConfig {
@@ -51,7 +64,7 @@ public record PubSubEventListenerConfig(
 
         Builder credentialsFilePath(String credentialsFilePath);
 
-        Builder messageFormat(MessageFormat messageFormat);
+        Builder encoding(Encoding encoding);
 
         PubSubEventListenerConfig build();
     }
@@ -69,8 +82,8 @@ public record PubSubEventListenerConfig(
         var projectId = config.get(PUBSUB_PROJECT_ID);
         var topicId = config.get(PUBSUB_TOPIC_ID);
         var credentialsFilePath = config.get(PUBSUB_CREDENTIALS_FILE);
-        var messageFormatConfig = config.getOrDefault(PUBSUB_FORMAT, MessageFormat.JSON.name());
-        var messageFormat = MessageFormat.valueOf(messageFormatConfig.toUpperCase());
+        var encodingConfig = config.get(PUBSUB_ENCODING);
+        var encoding = Encoding.fromOrDefault(encodingConfig, Encoding.JSON);
 
         return builder()
                 .trackQueryCreatedEvent(trackQueryCreatedEvent)
@@ -79,7 +92,7 @@ public record PubSubEventListenerConfig(
                 .projectId(projectId)
                 .topicId(topicId)
                 .credentialsFilePath(credentialsFilePath)
-                .messageFormat(messageFormat)
+                .encoding(encoding)
                 .build();
     }
 

@@ -2,10 +2,11 @@ package dev.regadas.trino.pubsub.listener;
 
 import io.trino.spi.eventlistener.EventListener;
 import io.trino.spi.eventlistener.EventListenerFactory;
+
 import java.io.IOException;
 import java.util.Map;
 
-public class PubSubEventListenerFactory implements EventListenerFactory {
+public final class PubSubEventListenerFactory implements EventListenerFactory {
 
     @Override
     public String getName() {
