@@ -1,8 +1,7 @@
 package dev.regadas.trino.pubsub.listener;
 
-import com.google.protobuf.Duration;
-import com.google.protobuf.Timestamp;
 import dev.regadas.trino.pubsub.listener.proto.Schema;
+
 import io.trino.spi.eventlistener.QueryCompletedEvent;
 import io.trino.spi.eventlistener.QueryContext;
 import io.trino.spi.eventlistener.QueryCreatedEvent;
@@ -11,15 +10,15 @@ import io.trino.spi.eventlistener.SplitCompletedEvent;
 
 public final class SchemaHelpers {
 
-    static Duration from(java.time.Duration duration) {
-        return Duration.newBuilder()
+    static Schema.Duration from(java.time.Duration duration) {
+        return Schema.Duration.newBuilder()
                 .setSeconds(duration.getSeconds())
                 .setNanos(duration.getNano())
                 .build();
     }
 
-    static Timestamp from(java.time.Instant instant) {
-        return Timestamp.newBuilder()
+    static Schema.Timestamp from(java.time.Instant instant) {
+        return Schema.Timestamp.newBuilder()
                 .setSeconds(instant.getEpochSecond())
                 .setNanos(instant.getNano())
                 .build();

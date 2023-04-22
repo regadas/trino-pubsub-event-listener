@@ -1,9 +1,20 @@
 syntax = "proto3";
 package dev.regadas.trino.pubsub.listener.proto;
 
-import "google/protobuf/duration.proto";
-import "google/protobuf/timestamp.proto";
-import "google/protobuf/any.proto";
+message Timestamp {
+  int64 seconds = 1;
+  int32 nanos = 2;
+}
+
+message Duration {
+  int64 seconds = 1;
+  int32 nanos = 2;
+}
+
+message Any {
+  string type_url = 1;
+  bytes value = 2;
+}
 
 message QueryCreatedEvent {
   QueryMetadata metadata = 1;
@@ -17,9 +28,9 @@ message QueryCompletedEvent {
   QueryIOMetadata io_metadata = 4;
   QueryFailureInfo failure_info = 5;
   repeated TrinoWarning warnings = 6;
-  google.protobuf.Timestamp create_time = 7;
-  google.protobuf.Timestamp execution_start_time = 8;
-  google.protobuf.Timestamp end_time = 9;
+  Timestamp create_time = 7;
+  Timestamp execution_start_time = 8;
+  Timestamp end_time = 9;
 }
 
 message TrinoWarning {
@@ -61,7 +72,7 @@ message QueryInputMetadata {
   string schema = 2;
   string table = 3;
   repeated string columns = 4;
-  google.protobuf.Any connector_info = 5;
+  Any connector_info = 5;
   string connector_metrics = 6;
   int64 physical_input_bytes = 7;
   int64 physical_input_rows = 8;
@@ -126,21 +137,21 @@ message ColumnInfo {
 }
 
 message QueryStatistics {
-  google.protobuf.Duration cpu_time = 1;
-  google.protobuf.Duration failed_cpu_time = 2;
-  google.protobuf.Duration wall_time = 3;
-  google.protobuf.Duration queued_time = 4;
-  google.protobuf.Duration scheduled_time = 5;
-  google.protobuf.Duration failed_scheduled_time = 6;
-  google.protobuf.Duration resource_waiting_time = 7;
-  google.protobuf.Duration analysis_time = 8;
-  google.protobuf.Duration planning_time = 9;
-  google.protobuf.Duration execution_time = 10;
-  google.protobuf.Duration input_blocked_time = 11;
-  google.protobuf.Duration failed_input_blocked_time = 12;
-  google.protobuf.Duration output_blocked_time = 13;
-  google.protobuf.Duration failed_output_blocked_time = 14;
-  google.protobuf.Duration physical_input_read_time = 15;
+  Duration cpu_time = 1;
+  Duration failed_cpu_time = 2;
+  Duration wall_time = 3;
+  Duration queued_time = 4;
+  Duration scheduled_time = 5;
+  Duration failed_scheduled_time = 6;
+  Duration resource_waiting_time = 7;
+  Duration analysis_time = 8;
+  Duration planning_time = 9;
+  Duration execution_time = 10;
+  Duration input_blocked_time = 11;
+  Duration failed_input_blocked_time = 12;
+  Duration output_blocked_time = 13;
+  Duration failed_output_blocked_time = 14;
+  Duration physical_input_read_time = 15;
   int64 peak_user_memory_bytes = 16;
   int64 peak_task_user_memory = 17;
   int64 peak_task_total_memory = 18;
@@ -202,7 +213,7 @@ message OutputBufferUtilization {
   double p99 = 8;
   double min = 9;
   double max = 10;
-  google.protobuf.Duration duration = 11;
+  Duration duration = 11;
 }
 
 message QueryContext {
@@ -229,8 +240,8 @@ message QueryContext {
 }
 
 message ResourceEstimates {
-  google.protobuf.Duration execution_time = 1;
-  google.protobuf.Duration cpu_time = 2;
+  Duration execution_time = 1;
+  Duration cpu_time = 2;
   int64 peak_memory_bytes = 3;
 }
 
@@ -239,25 +250,25 @@ message SplitCompletedEvent {
   string stage_id = 2;
   string task_id = 3;
   string catalog_name = 4;
-  google.protobuf.Timestamp create_time = 5;
-  google.protobuf.Timestamp start_time = 6;
-  google.protobuf.Timestamp end_time = 7;
+  Timestamp create_time = 5;
+  Timestamp start_time = 6;
+  Timestamp end_time = 7;
   SplitStatistics statistics = 8;
   SplitFailureInfo failure_info = 9;
   string payload = 10;
 }
 
 message SplitStatistics {
-  google.protobuf.Duration cpu_time = 1;
-  google.protobuf.Duration wall_time = 2;
-  google.protobuf.Duration queued_time = 3;
-  google.protobuf.Duration completed_read_time = 4;
+  Duration cpu_time = 1;
+  Duration wall_time = 2;
+  Duration queued_time = 3;
+  Duration completed_read_time = 4;
 
   int64 completed_positions = 5;
   int64 completed_data_size_bytes = 6;
 
-  google.protobuf.Duration time_to_first_byte = 7;
-  google.protobuf.Duration time_to_last_byte = 8;
+  Duration time_to_first_byte = 7;
+  Duration time_to_last_byte = 8;
 }
 
 message SplitFailureInfo {
