@@ -4,7 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import io.trino.spi.eventlistener.QueryCompletedEvent;
 import io.trino.spi.eventlistener.QueryContext;
+import io.trino.spi.eventlistener.QueryFailureInfo;
 import io.trino.spi.eventlistener.QueryMetadata;
+
 import org.junit.jupiter.api.Test;
 
 class SchemaHelpersTest {
@@ -29,6 +31,19 @@ class SchemaHelpersTest {
         assertEquals(schema.getQueryState(), metadata.getQueryState());
     }
 
+    private void fromQueryFailureInfo(QueryFailureInfo info) {
+        var schema = SchemaHelpers.from(info);
+
+        assertEquals(schema.getErrorCode().getCode(), info.getErrorCode().getCode());
+        assertEquals(schema.getErrorCode().getName(), info.getErrorCode().getName());
+        assertEquals(schema.getErrorCode().getType(), info.getErrorCode().getType());
+        assertEquals(schema.getFailureType(), info.getFailureType());
+        assertEquals(schema.getFailureMessage(), info.getFailureMessage());
+        assertEquals(schema.getFailureTask(), info.getFailureTask());
+        assertEquals(schema.getFailureHost(), info.getFailureHost());
+        assertEquals(schema.getFailuresJson(), info.getFailuresJson());
+    }
+
     private void fromQueryCompletedEvent(QueryCompletedEvent event) {
         var schema = SchemaHelpers.from(event);
 
@@ -41,6 +56,7 @@ class SchemaHelpersTest {
 
         fromQueryContext(event.getContext());
         fromQueryMetadata(event.getMetadata());
+        event.getFailureInfo().ifPresent(this::fromQueryFailureInfo);
     }
 
     @Test
