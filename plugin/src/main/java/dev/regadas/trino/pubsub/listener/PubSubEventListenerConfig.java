@@ -10,13 +10,15 @@ import dev.regadas.trino.pubsub.listener.Encoder.Encoding;
 import java.util.Map;
 import java.util.Optional;
 
+import javax.annotation.Nullable;
+
 public record PubSubEventListenerConfig(
         boolean trackQueryCreatedEvent,
         boolean trackQueryCompletedEvent,
         boolean trackSplitCompletedEvent,
         String projectId,
         String topicId,
-        String credentialsFilePath,
+        @Nullable String credentialsFilePath,
         Encoding encoding) {
     private static final String PUBSUB_CREDENTIALS_FILE = "pubsub-event-listener.credentials-file";
     private static final String PUBSUB_TRACK_CREATED = "pubsub-event-listener.log-created";
@@ -47,7 +49,7 @@ public record PubSubEventListenerConfig(
 
         Builder topicId(String topicId);
 
-        Builder credentialsFilePath(String credentialsFilePath);
+        Builder credentialsFilePath(@Nullable String credentialsFilePath);
 
         Builder encoding(Encoding encoding);
 
