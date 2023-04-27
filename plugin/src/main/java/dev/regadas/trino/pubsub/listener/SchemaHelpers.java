@@ -5,6 +5,7 @@ import dev.regadas.trino.pubsub.listener.proto.Schema;
 import io.trino.spi.eventlistener.QueryCompletedEvent;
 import io.trino.spi.eventlistener.QueryContext;
 import io.trino.spi.eventlistener.QueryCreatedEvent;
+import io.trino.spi.eventlistener.QueryFailureInfo;
 import io.trino.spi.eventlistener.QueryMetadata;
 import io.trino.spi.eventlistener.SplitCompletedEvent;
 
@@ -108,6 +109,26 @@ public final class SchemaHelpers {
         metadata.getPayload().ifPresent(metadataBuilder::setPayload);
 
         return metadataBuilder.build();
+    }
+
+    static final Schema.QueryFailureInfo from(QueryFailureInfo info) {
+        var errorCode =
+                Schema.ErrorCode.newBuilder()
+                        .setType(info.getErrorCode().getType().name())
+                        .setCode(info.getErrorCode().getCode())
+                        .setName(info.getErrorCode().getName())
+                        .build();
+        var builder =
+                Schema.QueryFailureInfo.newBuilder()
+                        .setErrorCode(errorCode)
+                        .setFailuresJson(info.getFailuresJson());
+
+        info.getFailureType().ifPresent(t -> builder.setFailureType(t.toString()));
+        info.getFailureMessage().ifPresent(builder::setFailureMessage);
+        info.getFailureTask().ifPresent(builder::setFailureTask);
+        info.getFailureHost().ifPresent(builder::setFailureHost);
+
+        return builder.build();
     }
 
     static final Schema.QueryCreatedEvent from(QueryCreatedEvent event) {
@@ -225,14 +246,17 @@ public final class SchemaHelpers {
                 .map(SchemaHelpers::from)
                 .ifPresent(statsBuilder::setPhysicalInputReadTime);
 
-        return Schema.QueryCompletedEvent.newBuilder()
-                .setMetadata(from(event.getMetadata()))
-                .setContext(from(event.getContext()))
-                .setStatistics(statsBuilder)
-                .setCreateTime(from(event.getCreateTime()))
-                .setExecutionStartTime(from(event.getExecutionStartTime()))
-                .setEndTime(from(event.getEndTime()))
-                .build();
+        var builder =
+                Schema.QueryCompletedEvent.newBuilder()
+                        .setMetadata(from(event.getMetadata()))
+                        .setContext(from(event.getContext()))
+                        .setStatistics(statsBuilder)
+                        .setCreateTime(from(event.getCreateTime()))
+                        .setExecutionStartTime(from(event.getExecutionStartTime()))
+                        .setEndTime(from(event.getEndTime()));
+        event.getFailureInfo().map(SchemaHelpers::from).ifPresent(builder::setFailureInfo);
+
+        return builder.build();
     }
 
     static final Schema.SplitCompletedEvent from(SplitCompletedEvent event) {
