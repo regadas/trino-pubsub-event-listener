@@ -4,6 +4,15 @@
 
 Trino Pub/Sub event listener is a plugin for [Trino](https://trino.io/) that allows you to send query events to Google Cloud Pub/Sub.
 
+``` mermaid
+graph LR
+    A(Trino) -- Query events --> B((Pub/Sub))
+    B --> C(HTTP)
+    B --> D(BigQuery)
+    B --> E(Apache Avro / GCS)
+```
+
+
 ## Usage
 
 To use this plugin you need to copy the distribution package to the Trino plugin (`<path_to_trino>/plugin/pubsub-event-listener/`) directory and configure the plugin.
