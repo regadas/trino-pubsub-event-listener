@@ -77,6 +77,9 @@ distributions {
 publishing {
     publications {
         mavenJava(MavenPublication) {
+            groupId 'dev.regadas'
+            artifactId 'trino-pubsub-event-listener'
+
             pom {
                 name = 'Trino Google PubSub Event Listener'
                 description = 'Publish Trino query events to Google PubSub'
