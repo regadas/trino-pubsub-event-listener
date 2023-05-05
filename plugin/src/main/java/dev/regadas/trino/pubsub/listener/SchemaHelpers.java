@@ -229,6 +229,9 @@ public final class SchemaHelpers {
                 .ifPresent(statsBuilder::setResourceWaitingTime);
         stats.getAnalysisTime().map(SchemaHelpers::from).ifPresent(statsBuilder::setAnalysisTime);
         stats.getPlanningTime().map(SchemaHelpers::from).ifPresent(statsBuilder::setPlanningTime);
+        stats.getPlanningCpuTime()
+                .map(SchemaHelpers::from)
+                .ifPresent(statsBuilder::setPlanningCpuTime);
         stats.getExecutionTime().map(SchemaHelpers::from).ifPresent(statsBuilder::setExecutionTime);
         stats.getInputBlockedTime()
                 .map(SchemaHelpers::from)

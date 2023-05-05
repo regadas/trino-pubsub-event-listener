@@ -175,6 +175,7 @@ message QueryStatistics {
   repeated CpuTimeDistribution cpu_time_distribution = 36;
   repeated OutputBufferUtilization output_buffer_utilization = 37;
   repeated string operator_summaries = 38;
+  Duration planning_cpu_time = 39;
 }
 
 message StageGcStatistics {
