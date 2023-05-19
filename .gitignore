@@ -25,3 +25,4 @@ gradle-app.setting
 .settings
 *.class
 .factorypath
+.idea

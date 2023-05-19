@@ -10,7 +10,6 @@ import com.google.cloud.pubsub.v1.Publisher;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
-import com.google.protobuf.util.JsonFormat;
 import com.google.pubsub.v1.PubsubMessage;
 
 import dev.regadas.trino.pubsub.listener.Encoder.MessageEncoder;
@@ -94,7 +93,12 @@ public final class PubSubEventListener implements EventListener, AutoCloseable {
                         }
 
                         public void onFailure(Throwable t) {
-                            LOG.log(Level.SEVERE, "Failed to publish event", t);
+                            LOG.log(
+                                    Level.SEVERE,
+                                    "Failed to publish event, error: "
+                                            + t.getMessage()
+                                            + " , event: "
+                                            + message.getData().toStringUtf8());
                         }
                     },
                     MoreExecutors.directExecutor());
