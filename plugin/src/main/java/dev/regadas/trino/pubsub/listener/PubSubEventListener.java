@@ -12,6 +12,8 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import com.google.pubsub.v1.PubsubMessage;
 import dev.regadas.trino.pubsub.listener.Encoder.MessageEncoder;
+import dev.regadas.trino.pubsub.listener.metrics.PubSubCounters;
+import dev.regadas.trino.pubsub.listener.metrics.PubSubInfo;
 import io.trino.spi.eventlistener.EventListener;
 import io.trino.spi.eventlistener.QueryCompletedEvent;
 import io.trino.spi.eventlistener.QueryCreatedEvent;
@@ -29,12 +31,14 @@ public final class PubSubEventListener implements EventListener, AutoCloseable {
     private final PubSubEventListenerConfig config;
     private final Publisher publisher;
     private final Encoder<Message> encoder;
+    private final PubSubInfo pubSubInfo;
 
     PubSubEventListener(
             PubSubEventListenerConfig config, Publisher publisher, Encoder<Message> encoder) {
         this.config = requireNonNull(config, "config is null");
         this.publisher = requireNonNull(publisher, "publisher is null");
         this.encoder = requireNonNull(encoder, "encoder is null");
+        this.pubSubInfo = new PubSubInfo(config.projectId(), config.topicId());
     }
 
     public static PubSubEventListener create(PubSubEventListenerConfig config) throws IOException {
@@ -57,26 +61,27 @@ public final class PubSubEventListener implements EventListener, AutoCloseable {
     @Override
     public void queryCreated(QueryCreatedEvent event) {
         if (config.trackQueryCreatedEvent()) {
-            publish(SchemaHelpers.from(event));
+            publish(SchemaHelpers.from(event), pubSubInfo.queryCreated());
         }
     }
 
     @Override
     public void queryCompleted(QueryCompletedEvent event) {
         if (config.trackQueryCompletedEvent()) {
-            publish(SchemaHelpers.from(event));
+            publish(SchemaHelpers.from(event), pubSubInfo.queryCompleted());
         }
     }
 
     @Override
     public void splitCompleted(SplitCompletedEvent event) {
         if (config.trackSplitCompletedEvent()) {
-            publish(SchemaHelpers.from(event));
+            publish(SchemaHelpers.from(event), pubSubInfo.splitCompleted());
         }
     }
 
-    void publish(Message event) {
+    void publish(Message event, PubSubCounters counters) {
         try {
+            counters.attempts().incrementAndGet();
             var data = encoder.encode(event);
             var message = PubsubMessage.newBuilder().setData(ByteString.copyFrom(data)).build();
 
@@ -86,16 +91,19 @@ public final class PubSubEventListener implements EventListener, AutoCloseable {
                     future,
                     new ApiFutureCallback<>() {
                         public void onSuccess(String id) {
+                            counters.successful().incrementAndGet();
                             LOG.log(Level.ALL, "published event with id: " + id);
                         }
 
                         public void onFailure(Throwable t) {
+                            counters.failure().incrementAndGet();
                             LOG.log(Level.SEVERE, "Failed to publish event", t);
                         }
                     },
                     MoreExecutors.directExecutor());
 
         } catch (Exception e) {
+            counters.failure().incrementAndGet();
             LOG.log(Level.SEVERE, "Failed to publish", e);
         }
     }
@@ -111,5 +119,9 @@ public final class PubSubEventListener implements EventListener, AutoCloseable {
                 LOG.log(Level.SEVERE, "Failed to shutdown publisher", e);
             }
         }
+    }
+
+    public PubSubInfo getPubSubInfo() {
+        return pubSubInfo;
     }
 }
