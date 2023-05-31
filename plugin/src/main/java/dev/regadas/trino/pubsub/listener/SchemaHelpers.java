@@ -1,13 +1,15 @@
 package dev.regadas.trino.pubsub.listener;
 
 import dev.regadas.trino.pubsub.listener.proto.Schema;
-
+import dev.regadas.trino.pubsub.listener.proto.Schema.TrinoWarning.Code;
+import io.trino.spi.WarningCode;
 import io.trino.spi.eventlistener.QueryCompletedEvent;
 import io.trino.spi.eventlistener.QueryContext;
 import io.trino.spi.eventlistener.QueryCreatedEvent;
 import io.trino.spi.eventlistener.QueryFailureInfo;
 import io.trino.spi.eventlistener.QueryMetadata;
 import io.trino.spi.eventlistener.SplitCompletedEvent;
+import io.trino.spi.eventlistener.SplitFailureInfo;
 
 public final class SchemaHelpers {
 
@@ -25,7 +27,7 @@ public final class SchemaHelpers {
                 .build();
     }
 
-    static final Schema.QueryContext from(QueryContext context) {
+    static Schema.QueryContext from(QueryContext context) {
         var contextBuilder =
                 Schema.QueryContext.newBuilder()
                         .setUser(context.getUser())
@@ -46,13 +48,14 @@ public final class SchemaHelpers {
         context.getUserAgent().ifPresent(contextBuilder::setUserAgent);
         context.getClientInfo().ifPresent(contextBuilder::setClientInfo);
         context.getResourceGroupId()
-                .ifPresent(r -> contextBuilder.setResourceGroupId(r.toString()));
-        context.getQueryType().ifPresent(q -> contextBuilder.setQueryType(q.toString()));
+                .map(Object::toString)
+                .ifPresent(contextBuilder::setResourceGroupId);
+        context.getQueryType().map(Object::toString).ifPresent(contextBuilder::setQueryType);
 
         return contextBuilder.build();
     }
 
-    static final Schema.QueryMetadata from(QueryMetadata metadata) {
+    static Schema.QueryMetadata from(QueryMetadata metadata) {
         var metadataBuilder =
                 Schema.QueryMetadata.newBuilder()
                         .setQueryId(metadata.getQueryId())
@@ -111,7 +114,7 @@ public final class SchemaHelpers {
         return metadataBuilder.build();
     }
 
-    static final Schema.QueryFailureInfo from(QueryFailureInfo info) {
+    static Schema.QueryFailureInfo from(QueryFailureInfo info) {
         var errorCode =
                 Schema.ErrorCode.newBuilder()
                         .setType(info.getErrorCode().getType().name())
@@ -123,7 +126,7 @@ public final class SchemaHelpers {
                         .setErrorCode(errorCode)
                         .setFailuresJson(info.getFailuresJson());
 
-        info.getFailureType().ifPresent(t -> builder.setFailureType(t.toString()));
+        info.getFailureType().ifPresent(builder::setFailureType);
         info.getFailureMessage().ifPresent(builder::setFailureMessage);
         info.getFailureTask().ifPresent(builder::setFailureTask);
         info.getFailureHost().ifPresent(builder::setFailureHost);
@@ -131,15 +134,16 @@ public final class SchemaHelpers {
         return builder.build();
     }
 
-    static final Schema.QueryCreatedEvent from(QueryCreatedEvent event) {
+    static Schema.QueryCreatedEvent from(QueryCreatedEvent event) {
 
         return Schema.QueryCreatedEvent.newBuilder()
+                .setCreateTime(from(event.getCreateTime()))
                 .setMetadata(from(event.getMetadata()))
                 .setContext(from(event.getContext()))
                 .build();
     }
 
-    static final Schema.QueryCompletedEvent from(QueryCompletedEvent event) {
+    static Schema.QueryCompletedEvent from(QueryCompletedEvent event) {
         var stats = event.getStatistics();
         var gcStats =
                 stats.getStageGcStatistics().stream()
@@ -249,6 +253,17 @@ public final class SchemaHelpers {
                 .map(SchemaHelpers::from)
                 .ifPresent(statsBuilder::setPhysicalInputReadTime);
 
+        var warnings =
+                event.getWarnings().stream()
+                        .map(
+                                tw ->
+                                        Schema.TrinoWarning.newBuilder()
+                                                .setMessage(tw.getMessage())
+                                                .setWarningCode(
+                                                        toSchemaWarningCode(tw.getWarningCode()))
+                                                .build())
+                        .toList();
+
         var builder =
                 Schema.QueryCompletedEvent.newBuilder()
                         .setMetadata(from(event.getMetadata()))
@@ -256,13 +271,22 @@ public final class SchemaHelpers {
                         .setStatistics(statsBuilder)
                         .setCreateTime(from(event.getCreateTime()))
                         .setExecutionStartTime(from(event.getExecutionStartTime()))
-                        .setEndTime(from(event.getEndTime()));
+                        .setEndTime(from(event.getEndTime()))
+                        .addAllWarnings(warnings);
         event.getFailureInfo().map(SchemaHelpers::from).ifPresent(builder::setFailureInfo);
 
         return builder.build();
     }
 
-    static final Schema.SplitCompletedEvent from(SplitCompletedEvent event) {
+    private static Code toSchemaWarningCode(WarningCode warningCode) {
+        return Code.newBuilder()
+                .setCode(warningCode.getCode())
+                .setName(warningCode.getName())
+                .build();
+    }
+
+    @SuppressWarnings("deprecation")
+    static Schema.SplitCompletedEvent from(SplitCompletedEvent event) {
         var stats = event.getStatistics();
         var statsBuilder =
                 Schema.SplitStatistics.newBuilder()
@@ -273,8 +297,20 @@ public final class SchemaHelpers {
                         .setCompletedPositions(stats.getCompletedPositions())
                         .setCompletedDataSizeBytes(stats.getCompletedDataSizeBytes());
 
-        stats.getTimeToFirstByte().ifPresent(SchemaHelpers::from);
-        stats.getTimeToLastByte().ifPresent(SchemaHelpers::from);
+        stats.getTimeToFirstByte()
+                .map(SchemaHelpers::from)
+                .ifPresent(statsBuilder::setTimeToFirstByte);
+        stats.getTimeToLastByte()
+                .map(SchemaHelpers::from)
+                .ifPresent(statsBuilder::setTimeToLastByte);
+
+        var failureInfoBuilder = Schema.SplitFailureInfo.newBuilder();
+        event.getFailureInfo()
+                .map(SplitFailureInfo::getFailureType)
+                .ifPresent(failureInfoBuilder::setFailureType);
+        event.getFailureInfo()
+                .map(SplitFailureInfo::getFailureMessage)
+                .ifPresent(failureInfoBuilder::setFailureMessage);
 
         var builder =
                 Schema.SplitCompletedEvent.newBuilder()
@@ -283,10 +319,11 @@ public final class SchemaHelpers {
                         .setTaskId(event.getTaskId())
                         .setPayload(event.getPayload())
                         .setStatistics(statsBuilder)
-                        .setCreateTime(from(event.getCreateTime()));
+                        .setCreateTime(from(event.getCreateTime()))
+                        .setFailureInfo(failureInfoBuilder);
 
-        event.getEndTime().ifPresent(SchemaHelpers::from);
-        event.getStartTime().ifPresent(SchemaHelpers::from);
+        event.getEndTime().map(SchemaHelpers::from).ifPresent(builder::setEndTime);
+        event.getStartTime().map(SchemaHelpers::from).ifPresent(builder::setStartTime);
         event.getCatalogName().ifPresent(builder::setCatalogName);
 
         return builder.build();
