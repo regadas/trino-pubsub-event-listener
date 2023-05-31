@@ -56,11 +56,11 @@ public record PubSubEventListenerConfig(
         PubSubEventListenerConfig build();
     }
 
-    public static final Builder builder() {
+    public static Builder builder() {
         return new AutoBuilder_PubSubEventListenerConfig_Builder();
     }
 
-    public static final PubSubEventListenerConfig create(Map<String, String> config) {
+    public static PubSubEventListenerConfig create(Map<String, String> config) {
         var trackQueryCreatedEvent = getBooleanConfig(config, PUBSUB_TRACK_CREATED).orElse(false);
         var trackQueryCompletedEvent =
                 getBooleanConfig(config, PUBSUB_TRACK_COMPLETED).orElse(false);
@@ -83,7 +83,7 @@ public record PubSubEventListenerConfig(
                 .build();
     }
 
-    private static final Optional<Boolean> getBooleanConfig(
+    private static Optional<Boolean> getBooleanConfig(
             Map<String, String> params, String paramName) {
         return Optional.ofNullable(params.get(paramName))
                 .filter(v -> !v.trim().isEmpty())

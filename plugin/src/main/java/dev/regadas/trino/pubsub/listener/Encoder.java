@@ -1,8 +1,10 @@
 package dev.regadas.trino.pubsub.listener;
 
-import com.google.protobuf.Message;
-import com.google.protobuf.util.JsonFormat;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
+import com.google.protobuf.Message;
+import com.google.protobuf.MessageLite;
+import com.google.protobuf.util.JsonFormat;
 import java.util.Optional;
 
 @FunctionalInterface
@@ -29,21 +31,12 @@ public interface Encoder<T> {
 
     @FunctionalInterface
     interface MessageEncoder extends Encoder<Message> {
-        static final JsonFormat.Printer JSON_PRINTER = JsonFormat.printer();
+        JsonFormat.Printer JSON_PRINTER = JsonFormat.printer();
 
         static MessageEncoder create(Encoding encoding) {
-            return new MessageEncoder() {
-                @Override
-                public byte[] encode(Message value) throws Exception {
-                    switch (encoding) {
-                        case JSON:
-                            return JSON_PRINTER.print(value).getBytes("UTF-8");
-                        case PROTO:
-                            return value.toByteArray();
-                        default:
-                            throw new IllegalArgumentException("Unknown encoding: " + encoding);
-                    }
-                }
+            return switch (encoding) {
+                case JSON -> value -> JSON_PRINTER.print(value).getBytes(UTF_8);
+                case PROTO -> MessageLite::toByteArray;
             };
         }
     }
