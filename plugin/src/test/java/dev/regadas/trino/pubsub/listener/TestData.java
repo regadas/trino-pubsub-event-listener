@@ -1,30 +1,39 @@
 package dev.regadas.trino.pubsub.listener;
 
 import static io.trino.spi.StandardErrorCode.GENERIC_INTERNAL_ERROR;
-
 import static java.lang.Boolean.TRUE;
 import static java.time.Duration.ofMillis;
 
 import com.google.common.collect.ImmutableMap;
-
 import io.trino.spi.TrinoWarning;
 import io.trino.spi.connector.StandardWarningCode;
 import io.trino.spi.eventlistener.ColumnDetail;
+import io.trino.spi.eventlistener.ColumnInfo;
 import io.trino.spi.eventlistener.OutputColumnMetadata;
 import io.trino.spi.eventlistener.QueryCompletedEvent;
 import io.trino.spi.eventlistener.QueryContext;
+import io.trino.spi.eventlistener.QueryCreatedEvent;
 import io.trino.spi.eventlistener.QueryFailureInfo;
 import io.trino.spi.eventlistener.QueryIOMetadata;
 import io.trino.spi.eventlistener.QueryInputMetadata;
 import io.trino.spi.eventlistener.QueryMetadata;
 import io.trino.spi.eventlistener.QueryOutputMetadata;
+import io.trino.spi.eventlistener.QueryPlanOptimizerStatistics;
 import io.trino.spi.eventlistener.QueryStatistics;
+import io.trino.spi.eventlistener.RoutineInfo;
+import io.trino.spi.eventlistener.SplitCompletedEvent;
+import io.trino.spi.eventlistener.SplitFailureInfo;
+import io.trino.spi.eventlistener.SplitStatistics;
+import io.trino.spi.eventlistener.StageCpuDistribution;
+import io.trino.spi.eventlistener.StageGcStatistics;
+import io.trino.spi.eventlistener.StageOutputBufferUtilization;
+import io.trino.spi.eventlistener.TableInfo;
 import io.trino.spi.metrics.Metrics;
 import io.trino.spi.resourcegroups.QueryType;
 import io.trino.spi.resourcegroups.ResourceGroupId;
 import io.trino.spi.session.ResourceEstimates;
-
 import java.net.URI;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
@@ -42,8 +51,16 @@ class TestData {
                     Optional.of("updateType"),
                     Optional.of("preparedQuery"),
                     "queryState",
-                    List.of(),
-                    List.of(),
+                    List.of(
+                            new TableInfo(
+                                    "hecate",
+                                    "events",
+                                    "EndSong",
+                                    "sa",
+                                    List.of("msPlayed>30000"),
+                                    List.of(new ColumnInfo("msPlayed", Optional.empty())),
+                                    true)),
+                    List.of(new RoutineInfo("decrypt", "padlockSA")),
                     URI.create("http://localhost"),
                     Optional.of("plan"),
                     Optional.of("jsonplan"),
@@ -85,14 +102,31 @@ class TestData {
                     1271L,
                     128.0,
                     129.0,
-                    Collections.emptyList(),
+                    List.of(new StageGcStatistics(0, 1, 42, 1, 3, 84, 2)),
                     130,
                     true,
-                    Collections.emptyList(),
-                    Collections.emptyList(),
+                    List.of(
+                            new StageCpuDistribution(
+                                    0, 1, 25, 50, 75, 90, 95, 99, 10, 100, 1000, 50.0)),
+                    List.of(
+                            new StageOutputBufferUtilization(
+                                    0,
+                                    1,
+                                    101,
+                                    105,
+                                    110,
+                                    125,
+                                    150,
+                                    175,
+                                    190,
+                                    195,
+                                    199,
+                                    100,
+                                    200,
+                                    Duration.ofSeconds(1500))),
                     List.of("{operator: \"operator1\"}", "{operator: \"operator2\"}"),
-                    Collections.emptyList(),
-                    Optional.empty());
+                    List.of(new QueryPlanOptimizerStatistics("tablescan", 3, 5, 6, 0)),
+                    Optional.of("statsAndCost"));
 
     public static final QueryContext FULL_QUERY_CONTEXT =
             new QueryContext(
@@ -279,4 +313,44 @@ class TestData {
                     Instant.now(),
                     Instant.now(),
                     Instant.now());
+
+    private static final SplitStatistics SPLIT_STATS =
+            new SplitStatistics(
+                    Duration.ofSeconds(3),
+                    Duration.ofSeconds(2),
+                    Duration.ofSeconds(1),
+                    Duration.ofSeconds(1),
+                    5L,
+                    10L,
+                    Optional.of(Duration.ofMillis(50L)),
+                    Optional.of(Duration.ofMillis(100L)));
+
+    public static final SplitCompletedEvent MINIMAL_SPLIT_COMPLETED_EVENT =
+            new SplitCompletedEvent(
+                    "query1",
+                    "stageA",
+                    "task01",
+                    Optional.empty(),
+                    Instant.now(),
+                    Optional.empty(),
+                    Optional.empty(),
+                    SPLIT_STATS,
+                    Optional.empty(),
+                    "split payload");
+
+    public static final SplitCompletedEvent FULL_SPLIT_COMPLETED_EVENT =
+            new SplitCompletedEvent(
+                    "query1",
+                    "stageA",
+                    "task01",
+                    Optional.of("hecate"),
+                    Instant.now(),
+                    Optional.of(Instant.now().minus(Duration.ofMillis(50))),
+                    Optional.of(Instant.now()),
+                    SPLIT_STATS,
+                    Optional.of(new SplitFailureInfo("fatal", "boom")),
+                    "split payload");
+
+    public static final QueryCreatedEvent FULL_QUERY_CREATED_EVENT =
+            new QueryCreatedEvent(Instant.now(), FULL_QUERY_CONTEXT, FULL_QUERY_METADATA);
 }

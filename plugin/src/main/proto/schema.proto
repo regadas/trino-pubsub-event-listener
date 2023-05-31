@@ -19,6 +19,7 @@ message Any {
 message QueryCreatedEvent {
   QueryMetadata metadata = 1;
   QueryContext context = 2;
+  Timestamp createTime = 3;
 }
 
 message QueryCompletedEvent {
