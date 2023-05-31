@@ -4,12 +4,9 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.auto.value.AutoBuilder;
 import com.google.pubsub.v1.TopicName;
-
 import dev.regadas.trino.pubsub.listener.Encoder.Encoding;
-
 import java.util.Map;
 import java.util.Optional;
-
 import javax.annotation.Nullable;
 
 public record PubSubEventListenerConfig(

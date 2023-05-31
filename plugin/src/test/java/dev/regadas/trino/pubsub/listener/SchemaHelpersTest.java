@@ -1,10 +1,9 @@
 package dev.regadas.trino.pubsub.listener;
 
-import static dev.regadas.trino.pubsub.listener.SchemaMatchers.equalToOrEmpty;
-import static dev.regadas.trino.pubsub.listener.SchemaMatchers.schemaDurationEqualToOrEmpty;
-import static dev.regadas.trino.pubsub.listener.SchemaMatchers.schemaEqualTo;
-import static dev.regadas.trino.pubsub.listener.SchemaMatchers.schemaTimestampEqualToOrEmpty;
+import static dev.regadas.trino.pubsub.listener.SchemaMatchers.durationEqualTo;
+import static dev.regadas.trino.pubsub.listener.SchemaMatchers.timestampEqualTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
 import io.trino.spi.eventlistener.QueryCompletedEvent;
@@ -14,6 +13,7 @@ import io.trino.spi.eventlistener.QueryFailureInfo;
 import io.trino.spi.eventlistener.QueryMetadata;
 import io.trino.spi.eventlistener.SplitCompletedEvent;
 import io.trino.spi.eventlistener.SplitFailureInfo;
+import java.time.Instant;
 import org.junit.jupiter.api.Test;
 
 class SchemaHelpersTest {
@@ -21,14 +21,15 @@ class SchemaHelpersTest {
     private void fromQueryContext(QueryContext context) {
         var schema = SchemaHelpers.from(context);
 
-        assertThat(schema.getSchema(), equalToOrEmpty(context.getSchema()));
-        assertThat(schema.getCatalog(), equalToOrEmpty(context.getCatalog()));
-        assertThat(schema.getPrincipal(), equalToOrEmpty(context.getPrincipal()));
-        assertThat(schema.getSource(), equalToOrEmpty(context.getSource()));
+        assertThat(schema.getSchema(), equalTo(context.getSchema().orElse("")));
+        assertThat(schema.getCatalog(), equalTo(context.getCatalog().orElse("")));
+        assertThat(schema.getPrincipal(), equalTo(context.getPrincipal().orElse("")));
+        assertThat(schema.getSource(), equalTo(context.getSource().orElse("")));
         assertThat(
-                schema.getRemoteClientAddress(), equalToOrEmpty(context.getRemoteClientAddress()));
-        assertThat(schema.getUserAgent(), equalToOrEmpty(context.getUserAgent()));
-        assertThat(schema.getTraceToken(), equalToOrEmpty(context.getTraceToken()));
+                schema.getRemoteClientAddress(),
+                equalTo(context.getRemoteClientAddress().orElse("")));
+        assertThat(schema.getUserAgent(), equalTo(context.getUserAgent().orElse("")));
+        assertThat(schema.getTraceToken(), equalTo(context.getTraceToken().orElse("")));
     }
 
     private void fromQueryMetadata(QueryMetadata metadata) {
@@ -45,19 +46,19 @@ class SchemaHelpersTest {
         assertThat(schema.getErrorCode().getCode(), is(info.getErrorCode().getCode()));
         assertThat(schema.getErrorCode().getName(), is(info.getErrorCode().getName()));
         assertThat(schema.getErrorCode().getType(), is(info.getErrorCode().getType().name()));
-        assertThat(schema.getFailureType(), equalToOrEmpty(info.getFailureType()));
-        assertThat(schema.getFailureMessage(), equalToOrEmpty(info.getFailureMessage()));
-        assertThat(schema.getFailureTask(), equalToOrEmpty(info.getFailureTask()));
-        assertThat(schema.getFailureHost(), equalToOrEmpty(info.getFailureHost()));
+        assertThat(schema.getFailureType(), equalTo(info.getFailureType().orElse("")));
+        assertThat(schema.getFailureMessage(), equalTo(info.getFailureMessage().orElse("")));
+        assertThat(schema.getFailureTask(), equalTo(info.getFailureTask().orElse("")));
+        assertThat(schema.getFailureHost(), equalTo(info.getFailureHost().orElse("")));
         assertThat(schema.getFailuresJson(), is(info.getFailuresJson()));
     }
 
     private void fromQueryCompletedEvent(QueryCompletedEvent event) {
         var schema = SchemaHelpers.from(event);
 
-        assertThat(schema.getCreateTime(), schemaEqualTo(event.getCreateTime()));
-        assertThat(schema.getExecutionStartTime(), schemaEqualTo(event.getExecutionStartTime()));
-        assertThat(schema.getEndTime(), schemaEqualTo(event.getEndTime()));
+        assertThat(schema.getCreateTime(), timestampEqualTo(event.getCreateTime()));
+        assertThat(schema.getExecutionStartTime(), timestampEqualTo(event.getExecutionStartTime()));
+        assertThat(schema.getEndTime(), timestampEqualTo(event.getEndTime()));
         assertThat(schema.getWarningsCount(), is(event.getWarnings().size()));
 
         fromQueryContext(event.getContext());
@@ -72,24 +73,26 @@ class SchemaHelpersTest {
         assertThat(schema.getQueryId(), is(event.getQueryId()));
         assertThat(schema.getStageId(), is(event.getStageId()));
         assertThat(schema.getTaskId(), is(event.getTaskId()));
-        assertThat(schema.getCatalogName(), equalToOrEmpty(event.getCatalogName()));
+        assertThat(schema.getCatalogName(), equalTo(event.getCatalogName().orElse("")));
 
-        assertThat(schema.getCreateTime(), schemaEqualTo(event.getCreateTime()));
-        assertThat(schema.getStartTime(), schemaTimestampEqualToOrEmpty(event.getStartTime()));
-        assertThat(schema.getEndTime(), schemaTimestampEqualToOrEmpty(event.getEndTime()));
+        assertThat(schema.getCreateTime(), timestampEqualTo(event.getCreateTime()));
+        assertThat(
+                schema.getStartTime(),
+                timestampEqualTo(event.getStartTime().orElse(Instant.EPOCH)));
+        assertThat(schema.getEndTime(), timestampEqualTo(event.getEndTime().orElse(Instant.EPOCH)));
 
         assertThat(
                 schema.getStatistics().getCpuTime(),
-                schemaEqualTo(event.getStatistics().getCpuTime()));
+                durationEqualTo(event.getStatistics().getCpuTime()));
         assertThat(
                 schema.getStatistics().getWallTime(),
-                schemaEqualTo(event.getStatistics().getWallTime()));
+                durationEqualTo(event.getStatistics().getWallTime()));
         assertThat(
                 schema.getStatistics().getQueuedTime(),
-                schemaEqualTo(event.getStatistics().getQueuedTime()));
+                durationEqualTo(event.getStatistics().getQueuedTime()));
         assertThat(
                 schema.getStatistics().getCompletedReadTime(),
-                schemaEqualTo(event.getStatistics().getCompletedReadTime()));
+                durationEqualTo(event.getStatistics().getCompletedReadTime()));
 
         assertThat(
                 schema.getStatistics().getCompletedPositions(),
@@ -100,17 +103,24 @@ class SchemaHelpersTest {
 
         assertThat(
                 schema.getStatistics().getTimeToFirstByte(),
-                schemaDurationEqualToOrEmpty(event.getStatistics().getTimeToFirstByte()));
+                durationEqualTo(
+                        event.getStatistics()
+                                .getTimeToFirstByte()
+                                .orElse(java.time.Duration.ZERO)));
         assertThat(
                 schema.getStatistics().getTimeToLastByte(),
-                schemaDurationEqualToOrEmpty(event.getStatistics().getTimeToLastByte()));
+                durationEqualTo(
+                        event.getStatistics().getTimeToLastByte().orElse(java.time.Duration.ZERO)));
 
         assertThat(
                 schema.getFailureInfo().getFailureType(),
-                equalToOrEmpty(event.getFailureInfo().map(SplitFailureInfo::getFailureType)));
+                equalTo(event.getFailureInfo().map(SplitFailureInfo::getFailureType).orElse("")));
         assertThat(
                 schema.getFailureInfo().getFailureMessage(),
-                equalToOrEmpty(event.getFailureInfo().map(SplitFailureInfo::getFailureMessage)));
+                equalTo(
+                        event.getFailureInfo()
+                                .map(SplitFailureInfo::getFailureMessage)
+                                .orElse("")));
 
         assertThat(schema.getPayload(), is(event.getPayload()));
     }
@@ -118,7 +128,7 @@ class SchemaHelpersTest {
     private void fromQueryCreatedEvent(QueryCreatedEvent event) {
         var schema = SchemaHelpers.from(event);
 
-        assertThat(schema.getCreateTime(), schemaEqualTo(event.getCreateTime()));
+        assertThat(schema.getCreateTime(), timestampEqualTo(event.getCreateTime()));
         fromQueryContext(event.getContext());
         fromQueryMetadata(event.getMetadata());
     }

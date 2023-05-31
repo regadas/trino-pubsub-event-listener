@@ -3,7 +3,6 @@ package dev.regadas.trino.pubsub.listener;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import com.google.protobuf.Message;
-import com.google.protobuf.MessageLite;
 import com.google.protobuf.util.JsonFormat;
 import java.util.Optional;
 
@@ -36,7 +35,7 @@ public interface Encoder<T> {
         static MessageEncoder create(Encoding encoding) {
             return switch (encoding) {
                 case JSON -> value -> JSON_PRINTER.print(value).getBytes(UTF_8);
-                case PROTO -> MessageLite::toByteArray;
+                case PROTO -> Message::toByteArray;
             };
         }
     }
