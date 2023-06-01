@@ -67,7 +67,7 @@ public final class PubSubEventListener implements EventListener, AutoCloseable {
 
             future.whenComplete(
                     (id, t) -> {
-                        if (t != null) {
+                        if (t == null) {
                             counters.successful().incrementAndGet();
                             LOG.log(Level.ALL, "published event with id: " + id);
                         } else {
