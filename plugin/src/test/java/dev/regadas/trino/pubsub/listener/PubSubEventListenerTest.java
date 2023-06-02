@@ -4,6 +4,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import com.google.protobuf.Message;
 import dev.regadas.trino.pubsub.listener.Encoder.Encoding;
@@ -25,25 +26,18 @@ class PubSubEventListenerTest {
     @CsvSource(
             textBlock =
                     """
-      # trackEvent,  pubResult, pubThrow, expAttempt, expSuccess, expFail
-      true,          true,      true,     1,          0,          1
-      true,          true,      false,    1,          1,          0
-      true,          false,     true,     1,          0,          1
-      true,          false,     false,    1,          0,          1
-      false,         true,      true,     0,          0,          0
-      false,         true,      false,    0,          0,          0
-      false,         false,     true,     0,          0,          0
-      false,         false,     false,    0,          0,          0
+      # trackEvent,  pubType,         expAttempt, expSuccess, expFail
+      true,          success,         1,          1,          0
+      true,          returnFailure,   1,          0,          1
+      true,          throwOnPublish,  1,          0,          1
+      false,         success,         0,          0,          0
+      false,         returnFailure,   0,          0,          0
+      false,         throwOnPublish,  0,          0,          0
       """)
     void testCounterForQueryCreated(
-            boolean trackEvent,
-            boolean pubResult,
-            boolean pubThrow,
-            long expAttempt,
-            long expSuccess,
-            long expFail)
+            boolean trackEvent, String pubType, long expAttempt, long expSuccess, long expFail)
             throws InterruptedException {
-        var publisher = new TestPublisher(pubResult, true, pubThrow);
+        var publisher = TestPublisher.from(pubType);
         var config =
                 new PubSubEventListenerConfig(
                         trackEvent, false, false, "", "", null, Encoding.JSON);
@@ -65,25 +59,18 @@ class PubSubEventListenerTest {
     @CsvSource(
             textBlock =
                     """
-      # trackEvent,  pubResult, pubThrow, expAttempt, expSuccess, expFail
-      true,          true,      true,     1,          0,          1
-      true,          true,      false,    1,          1,          0
-      true,          false,     true,     1,          0,          1
-      true,          false,     false,    1,          0,          1
-      false,         true,      true,     0,          0,          0
-      false,         true,      false,    0,          0,          0
-      false,         false,     true,     0,          0,          0
-      false,         false,     false,    0,          0,          0
+      # trackEvent,  pubType,         expAttempt, expSuccess, expFail
+      true,          success,         1,          1,          0
+      true,          returnFailure,   1,          0,          1
+      true,          throwOnPublish,  1,          0,          1
+      false,         success,         0,          0,          0
+      false,         returnFailure,   0,          0,          0
+      false,         throwOnPublish,  0,          0,          0
       """)
     void testCounterForQueryCompleted(
-            boolean trackEvent,
-            boolean pubResult,
-            boolean pubThrow,
-            long expAttempt,
-            long expSuccess,
-            long expFail)
+            boolean trackEvent, String pubType, long expAttempt, long expSuccess, long expFail)
             throws InterruptedException {
-        var publisher = new TestPublisher(pubResult, true, pubThrow);
+        var publisher = TestPublisher.from(pubType);
         var config =
                 new PubSubEventListenerConfig(
                         false, trackEvent, false, "", "", null, Encoding.JSON);
@@ -106,25 +93,18 @@ class PubSubEventListenerTest {
     @CsvSource(
             textBlock =
                     """
-      # trackEvent,  pubResult, pubThrow, expAttempt, expSuccess, expFail
-      true,          true,      true,     1,          0,          1
-      true,          true,      false,    1,          1,          0
-      true,          false,     true,     1,          0,          1
-      true,          false,     false,    1,          0,          1
-      false,         true,      true,     0,          0,          0
-      false,         true,      false,    0,          0,          0
-      false,         false,     true,     0,          0,          0
-      false,         false,     false,    0,          0,          0
+      # trackEvent,  pubType,         expAttempt, expSuccess, expFail
+      true,          success,         1,          1,          0
+      true,          returnFailure,   1,          0,          1
+      true,          throwOnPublish,  1,          0,          1
+      false,         success,         0,          0,          0
+      false,         returnFailure,   0,          0,          0
+      false,         throwOnPublish,  0,          0,          0
       """)
     void testCounterForSplitCompleted(
-            boolean trackEvent,
-            boolean pubResult,
-            boolean pubThrow,
-            long expAttempt,
-            long expSuccess,
-            long expFail)
+            boolean trackEvent, String pubType, long expAttempt, long expSuccess, long expFail)
             throws InterruptedException {
-        var publisher = new TestPublisher(pubResult, true, pubThrow);
+        var publisher = TestPublisher.from(pubType);
         var config =
                 new PubSubEventListenerConfig(
                         false, false, trackEvent, "", "", null, Encoding.JSON);
@@ -145,7 +125,7 @@ class PubSubEventListenerTest {
 
     @Test
     void testQueryCreatedPublishCorrespondingMessage() {
-        var publisher = new TestPublisher(true, true, false);
+        var publisher = new SuccessPublisher();
         var config = new PubSubEventListenerConfig(true, true, true, "", "", null, Encoding.JSON);
         var eventListener = new PubSubEventListener(config, publisher);
 
@@ -156,7 +136,7 @@ class PubSubEventListenerTest {
 
     @Test
     void testQueryCompletedPublishCorrespondingMessage() {
-        var publisher = new TestPublisher(true, true, false);
+        var publisher = new SuccessPublisher();
         var config = new PubSubEventListenerConfig(true, true, true, "", "", null, Encoding.JSON);
         var eventListener = new PubSubEventListener(config, publisher);
 
@@ -167,7 +147,7 @@ class PubSubEventListenerTest {
 
     @Test
     void testSplitCompletedPublishCorrespondingMessage() {
-        var publisher = new TestPublisher(true, true, false);
+        var publisher = new SuccessPublisher();
         var config = new PubSubEventListenerConfig(true, true, true, "", "", null, Encoding.JSON);
         var eventListener = new PubSubEventListener(config, publisher);
 
@@ -177,15 +157,14 @@ class PubSubEventListenerTest {
     }
 
     @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    void testShutdownNormally(boolean timeout) {
-        var publisher = new TestPublisher(true, timeout, false);
+    @ValueSource(strings = {"success", "throwOnClose"})
+    void testClosedNormally(String pubType) {
+        var publisher = TestPublisher.from(pubType);
         var config = new PubSubEventListenerConfig(true, true, true, "", "", null, Encoding.JSON);
         var eventListener = new PubSubEventListener(config, publisher);
 
-        eventListener.close();
-
-        assertThat(publisher.shutdownCalled, is(true));
+        assertDoesNotThrow(() -> eventListener.close());
+        assertThat(publisher.closeCalled, is(true));
     }
 
     public static <T> void assertThatEventually(T actual, Matcher<? super T> matcher)
@@ -197,37 +176,64 @@ class PubSubEventListenerTest {
         assertThat(actual, matcher);
     }
 
-    static class TestPublisher implements Publisher {
-
-        private final boolean pubResult;
-        private final boolean shutdownResult;
-        private final boolean throwExec;
-        private Message lastPublishedMessage;
-        private boolean shutdownCalled;
-
-        TestPublisher(boolean pubResult, boolean shutdownResult, boolean throwExec) {
-            this.pubResult = pubResult;
-            this.shutdownResult = shutdownResult;
-            this.throwExec = throwExec;
-        }
+    abstract static class TestPublisher implements Publisher {
+        Message lastPublishedMessage;
+        boolean closeCalled;
 
         @Override
         public CompletableFuture<String> publish(Message message) {
-            this.lastPublishedMessage = message;
-            if (throwExec) {
-                throw new UncheckedIOException("cannot send message", new IOException());
-            }
-            return (pubResult)
-                    ? CompletableFuture.completedFuture("1")
-                    : CompletableFuture.failedFuture(new IOException());
+            lastPublishedMessage = message;
+            return doPublish(message);
         }
 
         @Override
-        public void close() throws InterruptedException {
-            this.shutdownCalled = true;
-            if (shutdownResult) {
-                throw new InterruptedException("timeout");
-            }
+        public void close() throws Exception {
+            closeCalled = true;
+            doClose();
+        }
+
+        static TestPublisher from(String pubType) {
+            return switch (pubType) {
+                case "success" -> new SuccessPublisher();
+                case "returnFailure" -> new ReturnFailurePublisher();
+                case "throwOnPublish" -> new ThrowOnPublishPublisher();
+                case "throwOnClose" -> new ThrowOnClosePublisher();
+                default -> throw new IllegalArgumentException("invalid pudType: " + pubType);
+            };
+        }
+
+        protected CompletableFuture<String> doPublish(Message message) {
+            return null;
+        }
+
+        protected void doClose() throws Exception {}
+    }
+
+    static class SuccessPublisher extends TestPublisher {
+        @Override
+        public CompletableFuture<String> doPublish(Message message) {
+            return CompletableFuture.completedFuture("1");
+        }
+    }
+
+    static class ReturnFailurePublisher extends TestPublisher {
+        @Override
+        public CompletableFuture<String> doPublish(Message message) {
+            return CompletableFuture.failedFuture(new IOException());
+        }
+    }
+
+    static class ThrowOnPublishPublisher extends TestPublisher {
+        @Override
+        public CompletableFuture<String> doPublish(Message message) {
+            throw new UncheckedIOException(new IOException());
+        }
+    }
+
+    static class ThrowOnClosePublisher extends TestPublisher {
+        @Override
+        public void doClose() throws Exception {
+            throw new InterruptedException();
         }
     }
 }
