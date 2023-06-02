@@ -220,7 +220,7 @@ class PubSubEventListenerTest {
         }
 
         @Override
-        public void shutdown() throws InterruptedException {
+        public void close() throws InterruptedException {
             this.shutdownCalled = true;
             if (shutdownResult) {
                 throw new InterruptedException("timeout");

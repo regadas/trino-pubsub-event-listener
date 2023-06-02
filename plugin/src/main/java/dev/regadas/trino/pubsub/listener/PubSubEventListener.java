@@ -84,8 +84,8 @@ public final class PubSubEventListener implements EventListener, AutoCloseable {
     @Override
     public void close() {
         try {
-            publisher.shutdown();
-        } catch (InterruptedException e) {
+            publisher.close();
+        } catch (Exception e) {
             LOG.log(Level.SEVERE, "Failed to shutdown publisher", e);
         }
     }

@@ -66,7 +66,7 @@ public class PubSubPublisher implements Publisher {
     }
 
     @Override
-    public void shutdown() throws InterruptedException {
+    public void close() throws InterruptedException {
         publisher.shutdown();
         publisher.awaitTermination(60, TimeUnit.SECONDS);
     }
