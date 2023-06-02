@@ -1,6 +1,6 @@
 package dev.regadas.trino.pubsub.listener.metrics;
 
-import static java.util.Objects.*;
+import static java.util.Objects.requireNonNull;
 
 public class PubSubInfo implements PubSubInfoMBean {
 
