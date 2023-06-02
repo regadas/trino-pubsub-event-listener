@@ -22,11 +22,7 @@ public class MBeanRegister {
         try {
             var jmxDomainBase = config.getOrDefault(CONFIG_KEY, DEFAULT_DOMAIN_NAME);
             var platformMBeanServer = ManagementFactory.getPlatformMBeanServer();
-            var objectName =
-                    new ObjectName(
-                            "%s.PubSubEventListener:projectId=%s,topicId=%s"
-                                    .formatted(
-                                            jmxDomainBase, info.getProjectId(), info.getTopicId()));
+            var objectName = new ObjectName(jmxDomainBase + ".listener:name=PubSubEventListener");
             platformMBeanServer.registerMBean(info, objectName);
         } catch (MalformedObjectNameException
                 | NotCompliantMBeanException
