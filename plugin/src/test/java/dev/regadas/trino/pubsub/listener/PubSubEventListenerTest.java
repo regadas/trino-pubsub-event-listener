@@ -13,6 +13,7 @@ import dev.regadas.trino.pubsub.listener.pubsub.Publisher;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 import org.hamcrest.Matcher;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -21,6 +22,9 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 @SuppressWarnings("ALL")
 class PubSubEventListenerTest {
+
+    private static final int RETRY_DELAY = 20;
+    private static final int RETRY_COUNT = 5;
 
     @ParameterizedTest
     @CsvSource(
@@ -46,13 +50,13 @@ class PubSubEventListenerTest {
         eventListener.queryCreated(TestData.FULL_QUERY_CREATED_EVENT);
 
         assertThatEventually(
-                eventListener.getPubSubInfo().getQueryCreated().attempts().get(),
+                eventListener.getPubSubInfo().getQueryCreated().attempts()::get,
                 equalTo(expAttempt));
         assertThatEventually(
-                eventListener.getPubSubInfo().getQueryCreated().successful().get(),
+                eventListener.getPubSubInfo().getQueryCreated().successful()::get,
                 equalTo(expSuccess));
         assertThatEventually(
-                eventListener.getPubSubInfo().getQueryCreated().failure().get(), equalTo(expFail));
+                eventListener.getPubSubInfo().getQueryCreated().failure()::get, equalTo(expFail));
     }
 
     @ParameterizedTest
@@ -79,14 +83,13 @@ class PubSubEventListenerTest {
         eventListener.queryCompleted(TestData.FULL_QUERY_COMPLETED_EVENT);
 
         assertThatEventually(
-                eventListener.getPubSubInfo().getQueryCompleted().attempts().get(),
+                eventListener.getPubSubInfo().getQueryCompleted().attempts()::get,
                 equalTo(expAttempt));
         assertThatEventually(
-                eventListener.getPubSubInfo().getQueryCompleted().successful().get(),
+                eventListener.getPubSubInfo().getQueryCompleted().successful()::get,
                 equalTo(expSuccess));
         assertThatEventually(
-                eventListener.getPubSubInfo().getQueryCompleted().failure().get(),
-                equalTo(expFail));
+                eventListener.getPubSubInfo().getQueryCompleted().failure()::get, equalTo(expFail));
     }
 
     @ParameterizedTest
@@ -113,14 +116,13 @@ class PubSubEventListenerTest {
         eventListener.splitCompleted(TestData.FULL_SPLIT_COMPLETED_EVENT);
 
         assertThatEventually(
-                eventListener.getPubSubInfo().getSplitCompleted().attempts().get(),
+                eventListener.getPubSubInfo().getSplitCompleted().attempts()::get,
                 equalTo(expAttempt));
         assertThatEventually(
-                eventListener.getPubSubInfo().getSplitCompleted().successful().get(),
+                eventListener.getPubSubInfo().getSplitCompleted().successful()::get,
                 equalTo(expSuccess));
         assertThatEventually(
-                eventListener.getPubSubInfo().getSplitCompleted().failure().get(),
-                equalTo(expFail));
+                eventListener.getPubSubInfo().getSplitCompleted().failure()::get, equalTo(expFail));
     }
 
     @Test
@@ -167,13 +169,13 @@ class PubSubEventListenerTest {
         assertThat(publisher.closeCalled, is(true));
     }
 
-    public static <T> void assertThatEventually(T actual, Matcher<? super T> matcher)
+    public static <T> void assertThatEventually(Supplier<T> actual, Matcher<? super T> matcher)
             throws InterruptedException {
-        int tries = 5;
-        while (--tries > 0 && !matcher.matches(actual)) {
-            Thread.sleep(20);
+        int tries = RETRY_COUNT;
+        while (--tries > 0 && !matcher.matches(actual.get())) {
+            Thread.sleep(RETRY_DELAY);
         }
-        assertThat(actual, matcher);
+        assertThat(actual.get(), matcher);
     }
 
     abstract static class TestPublisher implements Publisher {
