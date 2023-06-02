@@ -43,8 +43,14 @@ class PubSubEventListenerTest {
             throws InterruptedException {
         var publisher = TestPublisher.from(pubType);
         var config =
-                new PubSubEventListenerConfig(
-                        trackEvent, false, false, "", "", null, Encoding.JSON);
+                PubSubEventListenerConfig.builder()
+                        .trackQueryCreatedEvent(trackEvent)
+                        .trackQueryCompletedEvent(false)
+                        .trackSplitCompletedEvent(false)
+                        .projectId("")
+                        .topicId("")
+                        .encoding(Encoding.JSON)
+                        .build();
         var eventListener = new PubSubEventListener(config, publisher);
 
         eventListener.queryCreated(TestData.FULL_QUERY_CREATED_EVENT);
@@ -76,8 +82,14 @@ class PubSubEventListenerTest {
             throws InterruptedException {
         var publisher = TestPublisher.from(pubType);
         var config =
-                new PubSubEventListenerConfig(
-                        false, trackEvent, false, "", "", null, Encoding.JSON);
+                PubSubEventListenerConfig.builder()
+                        .trackQueryCreatedEvent(false)
+                        .trackQueryCompletedEvent(trackEvent)
+                        .trackSplitCompletedEvent(false)
+                        .projectId("")
+                        .topicId("")
+                        .encoding(Encoding.JSON)
+                        .build();
         var eventListener = new PubSubEventListener(config, publisher);
 
         eventListener.queryCompleted(TestData.FULL_QUERY_COMPLETED_EVENT);
@@ -109,8 +121,14 @@ class PubSubEventListenerTest {
             throws InterruptedException {
         var publisher = TestPublisher.from(pubType);
         var config =
-                new PubSubEventListenerConfig(
-                        false, false, trackEvent, "", "", null, Encoding.JSON);
+                PubSubEventListenerConfig.builder()
+                        .trackQueryCreatedEvent(false)
+                        .trackQueryCompletedEvent(false)
+                        .trackSplitCompletedEvent(trackEvent)
+                        .projectId("")
+                        .topicId("")
+                        .encoding(Encoding.JSON)
+                        .build();
         var eventListener = new PubSubEventListener(config, publisher);
 
         eventListener.splitCompleted(TestData.FULL_SPLIT_COMPLETED_EVENT);
