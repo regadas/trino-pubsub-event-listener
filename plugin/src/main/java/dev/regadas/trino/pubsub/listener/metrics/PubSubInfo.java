@@ -2,24 +2,20 @@ package dev.regadas.trino.pubsub.listener.metrics;
 
 import static java.util.Objects.*;
 
-public record PubSubInfo(
-        String projectId,
-        String topicId,
-        PubSubCounters queryCreated,
-        PubSubCounters queryCompleted,
-        PubSubCounters splitCompleted)
-        implements PubSubInfoMBean {
+public class PubSubInfo implements PubSubInfoMBean {
+
+    private final String projectId;
+    private final String topicId;
+    private final PubSubCounters queryCreated;
+    private final PubSubCounters queryCompleted;
+    private final PubSubCounters splitCompleted;
 
     public PubSubInfo(String projectId, String topicId) {
-        this(projectId, topicId, new PubSubCounters(), new PubSubCounters(), new PubSubCounters());
-    }
-
-    public PubSubInfo {
-        requireNonNull(projectId, "projectId is null");
-        requireNonNull(topicId, "topicId is null");
-        requireNonNull(queryCreated, "queryCreated is null");
-        requireNonNull(queryCompleted, "queryCompleted is null");
-        requireNonNull(splitCompleted, "splitCompleted is null");
+        this.projectId = requireNonNull(projectId, "projectId is null");
+        this.topicId = requireNonNull(topicId, "topicId is null");
+        this.queryCreated = new PubSubCounters();
+        this.queryCompleted = new PubSubCounters();
+        this.splitCompleted = new PubSubCounters();
     }
 
     @Override
@@ -30,6 +26,18 @@ public record PubSubInfo(
     @Override
     public String getTopicId() {
         return this.topicId;
+    }
+
+    public PubSubCounters getQueryCreated() {
+        return queryCreated;
+    }
+
+    public PubSubCounters getQueryCompleted() {
+        return queryCompleted;
+    }
+
+    public PubSubCounters getSplitCompleted() {
+        return splitCompleted;
     }
 
     @Override

@@ -52,12 +52,13 @@ class PubSubEventListenerTest {
         eventListener.queryCreated(TestData.FULL_QUERY_CREATED_EVENT);
 
         assertThatEventually(
-                eventListener.getPubSubInfo().queryCreated().attempts().get(), equalTo(expAttempt));
+                eventListener.getPubSubInfo().getQueryCreated().attempts().get(),
+                equalTo(expAttempt));
         assertThatEventually(
-                eventListener.getPubSubInfo().queryCreated().successful().get(),
+                eventListener.getPubSubInfo().getQueryCreated().successful().get(),
                 equalTo(expSuccess));
         assertThatEventually(
-                eventListener.getPubSubInfo().queryCreated().failure().get(), equalTo(expFail));
+                eventListener.getPubSubInfo().getQueryCreated().failure().get(), equalTo(expFail));
     }
 
     @ParameterizedTest
@@ -91,13 +92,14 @@ class PubSubEventListenerTest {
         eventListener.queryCompleted(TestData.FULL_QUERY_COMPLETED_EVENT);
 
         assertThatEventually(
-                eventListener.getPubSubInfo().queryCompleted().attempts().get(),
+                eventListener.getPubSubInfo().getQueryCompleted().attempts().get(),
                 equalTo(expAttempt));
         assertThatEventually(
-                eventListener.getPubSubInfo().queryCompleted().successful().get(),
+                eventListener.getPubSubInfo().getQueryCompleted().successful().get(),
                 equalTo(expSuccess));
         assertThatEventually(
-                eventListener.getPubSubInfo().queryCompleted().failure().get(), equalTo(expFail));
+                eventListener.getPubSubInfo().getQueryCompleted().failure().get(),
+                equalTo(expFail));
     }
 
     @ParameterizedTest
@@ -131,13 +133,14 @@ class PubSubEventListenerTest {
         eventListener.splitCompleted(TestData.FULL_SPLIT_COMPLETED_EVENT);
 
         assertThatEventually(
-                eventListener.getPubSubInfo().splitCompleted().attempts().get(),
+                eventListener.getPubSubInfo().getSplitCompleted().attempts().get(),
                 equalTo(expAttempt));
         assertThatEventually(
-                eventListener.getPubSubInfo().splitCompleted().successful().get(),
+                eventListener.getPubSubInfo().getSplitCompleted().successful().get(),
                 equalTo(expSuccess));
         assertThatEventually(
-                eventListener.getPubSubInfo().splitCompleted().failure().get(), equalTo(expFail));
+                eventListener.getPubSubInfo().getSplitCompleted().failure().get(),
+                equalTo(expFail));
     }
 
     @Test
