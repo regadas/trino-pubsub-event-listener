@@ -1,87 +1,89 @@
 package dev.regadas.trino.pubsub.listener.metrics;
 
-import static java.util.Objects.requireNonNull;
+import com.google.auto.value.AutoValue;
 
-public class PubSubInfo implements PubSubInfoMBean {
+@AutoValue
+public abstract class PubSubInfo implements PubSubInfoMBean {
 
-    private final String projectId;
-    private final String topicId;
-    private final PubSubCounters queryCreated;
-    private final PubSubCounters queryCompleted;
-    private final PubSubCounters splitCompleted;
-
-    public PubSubInfo(String projectId, String topicId) {
-        this.projectId = requireNonNull(projectId, "projectId is null");
-        this.topicId = requireNonNull(topicId, "topicId is null");
-        this.queryCreated = new PubSubCounters();
-        this.queryCompleted = new PubSubCounters();
-        this.splitCompleted = new PubSubCounters();
+    public static final PubSubInfo create(String projectId, String topicId) {
+        return new AutoValue_PubSubInfo.Builder()
+                .setProjectId(projectId)
+                .setTopicId(topicId)
+                .setQueryCreated(new PubSubCounters())
+                .setQueryCompleted(new PubSubCounters())
+                .setSplitCompleted(new PubSubCounters())
+                .build();
     }
 
     @Override
-    public String getProjectId() {
-        return this.projectId;
-    }
+    public abstract String getProjectId();
 
     @Override
-    public String getTopicId() {
-        return this.topicId;
-    }
+    public abstract String getTopicId();
 
-    public PubSubCounters getQueryCreated() {
-        return queryCreated;
-    }
+    public abstract PubSubCounters getQueryCreated();
 
-    public PubSubCounters getQueryCompleted() {
-        return queryCompleted;
-    }
+    public abstract PubSubCounters getQueryCompleted();
 
-    public PubSubCounters getSplitCompleted() {
-        return splitCompleted;
-    }
+    public abstract PubSubCounters getSplitCompleted();
 
     @Override
     public Long getQueryCreatedPublicationAttempts() {
-        return queryCreated.attempts().get();
+        return getQueryCreated().attempts().get();
     }
 
     @Override
     public Long getQueryCreatedPublishedSuccessfully() {
-        return queryCreated.successful().get();
+        return getQueryCreated().successful().get();
     }
 
     @Override
     public Long getQueryCreatedPublicationFailed() {
-        return queryCreated.failure().get();
+        return getQueryCreated().failure().get();
     }
 
     @Override
     public Long getQueryCompletedPublicationAttempts() {
-        return queryCompleted.attempts().get();
+        return getQueryCompleted().attempts().get();
     }
 
     @Override
     public Long getQueryCompletedPublishedSuccessfully() {
-        return queryCompleted.successful().get();
+        return getQueryCompleted().successful().get();
     }
 
     @Override
     public Long getQueryCompletedPublicationFailed() {
-        return queryCompleted.failure().get();
+        return getQueryCompleted().failure().get();
     }
 
     @Override
     public Long getSplitCompletedPublicationAttempts() {
-        return splitCompleted.attempts().get();
+        return getSplitCompleted().attempts().get();
     }
 
     @Override
     public Long getSplitCompletedPublishedSuccessfully() {
-        return splitCompleted.successful().get();
+        return getSplitCompleted().successful().get();
     }
 
     @Override
     public Long getSplitCompletedPublicationFailed() {
-        return splitCompleted.failure().get();
+        return getSplitCompleted().failure().get();
+    }
+
+    @AutoValue.Builder
+    public abstract static class Builder {
+        public abstract Builder setProjectId(String projectId);
+
+        public abstract Builder setTopicId(String topicId);
+
+        public abstract Builder setQueryCreated(PubSubCounters queryCreated);
+
+        public abstract Builder setQueryCompleted(PubSubCounters queryCompleted);
+
+        public abstract Builder setSplitCompleted(PubSubCounters splitCompleted);
+
+        public abstract PubSubInfo build();
     }
 }

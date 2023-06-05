@@ -26,7 +26,7 @@ public final class PubSubEventListener implements EventListener, AutoCloseable {
     PubSubEventListener(PubSubEventListenerConfig config, Publisher publisher) {
         this.config = requireNonNull(config, "config is null");
         this.publisher = requireNonNull(publisher, "publisher is null");
-        this.pubSubInfo = new PubSubInfo(config.projectId(), config.topicId());
+        this.pubSubInfo = PubSubInfo.create(config.projectId(), config.topicId());
     }
 
     public static PubSubEventListener create(PubSubEventListenerConfig config) throws IOException {
