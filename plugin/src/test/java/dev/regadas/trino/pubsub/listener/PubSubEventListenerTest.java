@@ -32,11 +32,11 @@ class PubSubEventListenerTest {
                     """
       # trackEvent,  pubType,         expAttempt, expSuccess, expFail
       true,          success,         1,          1,          0
-      true,          returnFailure,   1,          0,          1
-      true,          throwOnPublish,  1,          0,          1
+      true,          return_failure,   1,          0,          1
+      true,          throw_on_publish,  1,          0,          1
       false,         success,         0,          0,          0
-      false,         returnFailure,   0,          0,          0
-      false,         throwOnPublish,  0,          0,          0
+      false,         return_failure,   0,          0,          0
+      false,         throw_on_publish,  0,          0,          0
       """)
     void testCounterForQueryCreated(
             boolean trackEvent, String pubType, long expAttempt, long expSuccess, long expFail)
@@ -71,11 +71,11 @@ class PubSubEventListenerTest {
                     """
       # trackEvent,  pubType,         expAttempt, expSuccess, expFail
       true,          success,         1,          1,          0
-      true,          returnFailure,   1,          0,          1
-      true,          throwOnPublish,  1,          0,          1
+      true,          return_failure,   1,          0,          1
+      true,          throw_on_publish,  1,          0,          1
       false,         success,         0,          0,          0
-      false,         returnFailure,   0,          0,          0
-      false,         throwOnPublish,  0,          0,          0
+      false,         return_failure,   0,          0,          0
+      false,         throw_on_publish,  0,          0,          0
       """)
     void testCounterForQueryCompleted(
             boolean trackEvent, String pubType, long expAttempt, long expSuccess, long expFail)
@@ -110,11 +110,11 @@ class PubSubEventListenerTest {
                     """
       # trackEvent,  pubType,         expAttempt, expSuccess, expFail
       true,          success,         1,          1,          0
-      true,          returnFailure,   1,          0,          1
-      true,          throwOnPublish,  1,          0,          1
+      true,          return_failure,   1,          0,          1
+      true,          throw_on_publish,  1,          0,          1
       false,         success,         0,          0,          0
-      false,         returnFailure,   0,          0,          0
-      false,         throwOnPublish,  0,          0,          0
+      false,         return_failure,   0,          0,          0
+      false,         throw_on_publish,  0,          0,          0
       """)
     void testCounterForSplitCompleted(
             boolean trackEvent, String pubType, long expAttempt, long expSuccess, long expFail)
@@ -146,7 +146,15 @@ class PubSubEventListenerTest {
     @Test
     void testQueryCreatedPublishCorrespondingMessage() {
         var publisher = new SuccessPublisher();
-        var config = new PubSubEventListenerConfig(true, true, true, "", "", null, Encoding.JSON);
+        var config =
+                PubSubEventListenerConfig.builder()
+                        .trackQueryCreatedEvent(true)
+                        .trackQueryCompletedEvent(true)
+                        .trackSplitCompletedEvent(true)
+                        .projectId("")
+                        .topicId("")
+                        .encoding(Encoding.JSON)
+                        .build();
         var eventListener = new PubSubEventListener(config, publisher);
 
         eventListener.queryCreated(TestData.FULL_QUERY_CREATED_EVENT);
@@ -157,7 +165,15 @@ class PubSubEventListenerTest {
     @Test
     void testQueryCompletedPublishCorrespondingMessage() {
         var publisher = new SuccessPublisher();
-        var config = new PubSubEventListenerConfig(true, true, true, "", "", null, Encoding.JSON);
+        var config =
+                PubSubEventListenerConfig.builder()
+                        .trackQueryCreatedEvent(true)
+                        .trackQueryCompletedEvent(true)
+                        .trackSplitCompletedEvent(true)
+                        .projectId("")
+                        .topicId("")
+                        .encoding(Encoding.JSON)
+                        .build();
         var eventListener = new PubSubEventListener(config, publisher);
 
         eventListener.queryCompleted(TestData.FULL_QUERY_COMPLETED_EVENT);
@@ -168,7 +184,15 @@ class PubSubEventListenerTest {
     @Test
     void testSplitCompletedPublishCorrespondingMessage() {
         var publisher = new SuccessPublisher();
-        var config = new PubSubEventListenerConfig(true, true, true, "", "", null, Encoding.JSON);
+        var config =
+                PubSubEventListenerConfig.builder()
+                        .trackQueryCreatedEvent(true)
+                        .trackQueryCompletedEvent(true)
+                        .trackSplitCompletedEvent(true)
+                        .projectId("")
+                        .topicId("")
+                        .encoding(Encoding.JSON)
+                        .build();
         var eventListener = new PubSubEventListener(config, publisher);
 
         eventListener.splitCompleted(TestData.FULL_SPLIT_COMPLETED_EVENT);
@@ -177,10 +201,18 @@ class PubSubEventListenerTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"success", "throwOnClose"})
+    @ValueSource(strings = {"success", "throw_on_close"})
     void testClosedNormally(String pubType) {
         var publisher = TestPublisher.from(pubType);
-        var config = new PubSubEventListenerConfig(true, true, true, "", "", null, Encoding.JSON);
+        var config =
+                PubSubEventListenerConfig.builder()
+                        .trackQueryCreatedEvent(true)
+                        .trackQueryCompletedEvent(true)
+                        .trackSplitCompletedEvent(true)
+                        .projectId("")
+                        .topicId("")
+                        .encoding(Encoding.JSON)
+                        .build();
         var eventListener = new PubSubEventListener(config, publisher);
 
         assertDoesNotThrow(() -> eventListener.close());
@@ -197,6 +229,13 @@ class PubSubEventListenerTest {
     }
 
     abstract static class TestPublisher implements Publisher {
+        enum PubType {
+            SUCCESS,
+            RETURN_FAILURE,
+            THROW_ON_PUBLISH,
+            THROW_ON_CLOSE
+        }
+
         Message lastPublishedMessage;
         boolean closeCalled;
 
@@ -213,12 +252,11 @@ class PubSubEventListenerTest {
         }
 
         static TestPublisher from(String pubType) {
-            return switch (pubType) {
-                case "success" -> new SuccessPublisher();
-                case "returnFailure" -> new ReturnFailurePublisher();
-                case "throwOnPublish" -> new ThrowOnPublishPublisher();
-                case "throwOnClose" -> new ThrowOnClosePublisher();
-                default -> throw new IllegalArgumentException("invalid pudType: " + pubType);
+            return switch (PubType.valueOf(pubType.toUpperCase())) {
+                case SUCCESS -> new SuccessPublisher();
+                case RETURN_FAILURE -> new ReturnFailurePublisher();
+                case THROW_ON_PUBLISH -> new ThrowOnPublishPublisher();
+                case THROW_ON_CLOSE -> new ThrowOnClosePublisher();
             };
         }
 
