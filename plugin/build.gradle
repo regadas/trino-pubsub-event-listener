@@ -56,8 +56,8 @@ spotless {
     endWithNewline()
   }
   java {
-    // don't need to set target, it is inferred from java
-
+    importOrder()
+    removeUnusedImports()
     // apply a specific flavor of google-java-format
     googleJavaFormat('1.16.0').aosp().reflowLongStrings()
     // fix formatting of type annotations
@@ -126,3 +126,5 @@ publishing {
 signing {
     sign publishing.publications.mavenJava
 }
+
+compileJava.dependsOn 'spotlessApply'

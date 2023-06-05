@@ -20,5 +20,8 @@ jobs:
         with:
           gradle-version: 8.0.2
 
+      - name: Execute Gradle spotlessCheck
+        run: ./gradlew spotlessCheck
+
       - name: Execute Gradle build
         run: ./gradlew build
