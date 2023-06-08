@@ -1,9 +1,11 @@
 package dev.regadas.trino.pubsub.listener.metrics;
 
 import java.lang.management.ManagementFactory;
+import java.util.Hashtable;
 import java.util.Map;
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.MBeanRegistrationException;
+import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
@@ -17,18 +19,59 @@ public class MBeanRegister {
     // Same as
     // https://github.com/trinodb/trino/blob/f680380ae1adbb3c47ee6953873197a0c82dc308/core/trino-main/src/main/java/io/trino/server/JmxNamingConfig.java#L20
     private static final String DEFAULT_DOMAIN_NAME = "trino";
+    private static final String KEY_NAME = "name";
+    private static final String MBEAN_NAME = "PubSubEventListener";
+    private static final String EVENT_TYPE_KEY = "eventType";
+    private static final String PUBLISHED_KEY = "published";
+    private static final String NAME_FORMAT = "%s.listener";
 
-    public static void registerMBean(Map<String, String> config, PubSubInfoMBean info) {
+    public static void registerMBean(Map<String, String> config, CountersPerEventType counters) {
         try {
             var jmxDomainBase = config.getOrDefault(CONFIG_KEY, DEFAULT_DOMAIN_NAME);
             var platformMBeanServer = ManagementFactory.getPlatformMBeanServer();
-            var objectName = new ObjectName(jmxDomainBase + ".listener:name=PubSubEventListener");
-            platformMBeanServer.registerMBean(info, objectName);
+            registerCounters(jmxDomainBase, platformMBeanServer, counters.queryCompleted());
+            registerCounters(jmxDomainBase, platformMBeanServer, counters.queryCreated());
+            registerCounters(jmxDomainBase, platformMBeanServer, counters.splitCompleted());
+
         } catch (MalformedObjectNameException
                 | NotCompliantMBeanException
                 | InstanceAlreadyExistsException
                 | MBeanRegistrationException e) {
             throw new RuntimeException("Failed to register MBean for PubSubEventListener", e);
         }
+    }
+
+    private static void registerCounters(
+            String jmxDomainBase, MBeanServer platformMBeanServer, EventCounters counters)
+            throws MalformedObjectNameException,
+                    InstanceAlreadyExistsException,
+                    MBeanRegistrationException,
+                    NotCompliantMBeanException {
+        var eventType = counters.eventType();
+        registerCounter(jmxDomainBase, platformMBeanServer, eventType, counters.succeeded());
+        registerCounter(jmxDomainBase, platformMBeanServer, eventType, counters.failed());
+    }
+
+    private static void registerCounter(
+            String jmxDomainBase,
+            MBeanServer platformMBeanServer,
+            String eventType,
+            Counter counter)
+            throws MalformedObjectNameException,
+                    InstanceAlreadyExistsException,
+                    MBeanRegistrationException,
+                    NotCompliantMBeanException {
+        var objectName =
+                new ObjectName(
+                        NAME_FORMAT.formatted(jmxDomainBase),
+                        new Hashtable<>(
+                                Map.of(
+                                        KEY_NAME,
+                                        MBEAN_NAME,
+                                        EVENT_TYPE_KEY,
+                                        eventType,
+                                        PUBLISHED_KEY,
+                                        counter.kind())));
+        platformMBeanServer.registerMBean(counter, objectName);
     }
 }

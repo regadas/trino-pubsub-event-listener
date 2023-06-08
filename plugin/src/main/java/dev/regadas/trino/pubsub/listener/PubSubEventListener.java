@@ -3,8 +3,8 @@ package dev.regadas.trino.pubsub.listener;
 import static java.util.Objects.requireNonNull;
 
 import com.google.protobuf.Message;
-import dev.regadas.trino.pubsub.listener.metrics.PubSubCounters;
-import dev.regadas.trino.pubsub.listener.metrics.PubSubInfo;
+import dev.regadas.trino.pubsub.listener.metrics.CountersPerEventType;
+import dev.regadas.trino.pubsub.listener.metrics.EventCounters;
 import dev.regadas.trino.pubsub.listener.pubsub.PubSubPublisher;
 import dev.regadas.trino.pubsub.listener.pubsub.Publisher;
 import io.trino.spi.eventlistener.EventListener;
@@ -21,62 +21,67 @@ public final class PubSubEventListener implements EventListener, AutoCloseable {
 
     private final PubSubEventListenerConfig config;
     private final Publisher publisher;
-    private final PubSubInfo pubSubInfo;
+    private final CountersPerEventType countersPerEventType;
 
-    PubSubEventListener(PubSubEventListenerConfig config, Publisher publisher) {
+    PubSubEventListener(
+            PubSubEventListenerConfig config,
+            Publisher publisher,
+            CountersPerEventType countersPerEventType) {
         this.config = requireNonNull(config, "config is null");
         this.publisher = requireNonNull(publisher, "publisher is null");
-        this.pubSubInfo = PubSubInfo.create(config.projectId(), config.topicId());
+        this.countersPerEventType =
+                requireNonNull(countersPerEventType, "countersPerEventType is null");
     }
 
-    public static PubSubEventListener create(PubSubEventListenerConfig config) throws IOException {
+    public static PubSubEventListener create(
+            PubSubEventListenerConfig config, CountersPerEventType countersPerEventType)
+            throws IOException {
         var publisher =
                 PubSubPublisher.create(
                         config.projectId(),
                         config.topicId(),
                         config.encoding(),
                         config.credentialsFilePath());
-        return new PubSubEventListener(config, publisher);
+        return new PubSubEventListener(config, publisher, countersPerEventType);
     }
 
     @Override
     public void queryCreated(QueryCreatedEvent event) {
         if (config.trackQueryCreatedEvent()) {
-            publish(SchemaHelpers.from(event), pubSubInfo.getQueryCreated());
+            publish(SchemaHelpers.from(event), countersPerEventType.queryCreated());
         }
     }
 
     @Override
     public void queryCompleted(QueryCompletedEvent event) {
         if (config.trackQueryCompletedEvent()) {
-            publish(SchemaHelpers.from(event), pubSubInfo.getQueryCompleted());
+            publish(SchemaHelpers.from(event), countersPerEventType.queryCompleted());
         }
     }
 
     @Override
     public void splitCompleted(SplitCompletedEvent event) {
         if (config.trackSplitCompletedEvent()) {
-            publish(SchemaHelpers.from(event), pubSubInfo.getSplitCompleted());
+            publish(SchemaHelpers.from(event), countersPerEventType.splitCompleted());
         }
     }
 
-    void publish(Message event, PubSubCounters counters) {
+    void publish(Message event, EventCounters counters) {
         try {
-            counters.attempts().incrementAndGet();
             var future = publisher.publish(event);
 
             future.whenComplete(
                     (id, t) -> {
                         if (t == null) {
-                            counters.successful().incrementAndGet();
+                            counters.succeeded().increment();
                             LOG.log(Level.ALL, "published event with id: " + id);
                         } else {
-                            counters.failure().incrementAndGet();
+                            counters.failed().increment();
                             LOG.log(Level.SEVERE, "Failed to publish event", t);
                         }
                     });
         } catch (Exception e) {
-            counters.failure().incrementAndGet();
+            counters.failed().increment();
             LOG.log(Level.SEVERE, "Failed to publish", e);
         }
     }
@@ -88,9 +93,5 @@ public final class PubSubEventListener implements EventListener, AutoCloseable {
         } catch (Exception e) {
             LOG.log(Level.SEVERE, "Failed to shutdown publisher", e);
         }
-    }
-
-    public PubSubInfo getPubSubInfo() {
-        return pubSubInfo;
     }
 }
