@@ -1,7 +1,6 @@
 package dev.regadas.trino.pubsub.listener.metrics;
 
 import java.lang.management.ManagementFactory;
-import java.util.Hashtable;
 import java.util.Map;
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.MBeanRegistrationException;
@@ -19,11 +18,8 @@ public class MBeanRegister {
     // Same as
     // https://github.com/trinodb/trino/blob/f680380ae1adbb3c47ee6953873197a0c82dc308/core/trino-main/src/main/java/io/trino/server/JmxNamingConfig.java#L20
     private static final String DEFAULT_DOMAIN_NAME = "trino";
-    private static final String KEY_NAME = "name";
-    private static final String MBEAN_NAME = "PubSubEventListener";
-    private static final String EVENT_TYPE_KEY = "eventType";
-    private static final String PUBLISHED_KEY = "published";
-    private static final String NAME_FORMAT = "%s.listener";
+    private static final String MBEAN_OBJECT_NAME_FORMAT =
+            "%s.listener.PubSubEventListener:name=EventPublish,eventType=%s,status=%s";
 
     public static void registerMBean(Map<String, String> config, CountersPerEventType counters) {
         try {
@@ -61,17 +57,14 @@ public class MBeanRegister {
                     InstanceAlreadyExistsException,
                     MBeanRegistrationException,
                     NotCompliantMBeanException {
-        var objectName =
-                new ObjectName(
-                        NAME_FORMAT.formatted(jmxDomainBase),
-                        new Hashtable<>(
-                                Map.of(
-                                        KEY_NAME,
-                                        MBEAN_NAME,
-                                        EVENT_TYPE_KEY,
-                                        eventType,
-                                        PUBLISHED_KEY,
-                                        counter.kind())));
+        var objectName = builObjectName(jmxDomainBase, eventType, counter);
         platformMBeanServer.registerMBean(counter, objectName);
+    }
+
+    private static ObjectName builObjectName(
+            String jmxDomainBase, String eventType, Counter counter)
+            throws MalformedObjectNameException {
+        return new ObjectName(
+                MBEAN_OBJECT_NAME_FORMAT.formatted(jmxDomainBase, eventType, counter.kind()));
     }
 }
