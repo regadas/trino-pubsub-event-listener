@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import com.google.protobuf.Message;
 import dev.regadas.trino.pubsub.listener.Encoder.Encoding;
+import dev.regadas.trino.pubsub.listener.metrics.PubSubEventListenerStats;
 import dev.regadas.trino.pubsub.listener.proto.Schema;
 import dev.regadas.trino.pubsub.listener.pubsub.Publisher;
 import java.io.IOException;
@@ -30,16 +31,16 @@ class PubSubEventListenerTest {
     @CsvSource(
             textBlock =
                     """
-      # trackEvent,  pubType,         expAttempt, expSuccess, expFail
-      true,          success,         1,          1,          0
-      true,          return_failure,   1,          0,          1
-      true,          throw_on_publish,  1,          0,          1
-      false,         success,         0,          0,          0
-      false,         return_failure,   0,          0,          0
-      false,         throw_on_publish,  0,          0,          0
+      # trackEvent,  pubType,          expSuccess, expFail
+      true,          success,          1,          0
+      true,          return_failure,   0,          1
+      true,          throw_on_publish, 0,          1
+      false,         success,          0,          0
+      false,         return_failure,   0,          0
+      false,         throw_on_publish, 0,          0
       """)
     void testCounterForQueryCreated(
-            boolean trackEvent, String pubType, long expAttempt, long expSuccess, long expFail)
+            boolean trackEvent, String pubType, long expSuccess, long expFail)
             throws InterruptedException {
         var publisher = TestPublisher.from(pubType);
         var config =
@@ -51,34 +52,32 @@ class PubSubEventListenerTest {
                         .topicId("")
                         .encoding(Encoding.JSON)
                         .build();
-        var eventListener = new PubSubEventListener(config, publisher);
+        var countersPerEventType = PubSubEventListenerStats.init();
+        var eventListener = PubSubEventListener.create(config, publisher, countersPerEventType);
 
         eventListener.queryCreated(TestData.FULL_QUERY_CREATED_EVENT);
 
         assertThatEventually(
-                eventListener.getPubSubInfo().getQueryCreated().attempts()::get,
-                equalTo(expAttempt));
-        assertThatEventually(
-                eventListener.getPubSubInfo().getQueryCreated().successful()::get,
+                countersPerEventType.getQueryCreated().published()::getTotalCount,
                 equalTo(expSuccess));
         assertThatEventually(
-                eventListener.getPubSubInfo().getQueryCreated().failure()::get, equalTo(expFail));
+                countersPerEventType.getQueryCreated().failed()::getTotalCount, equalTo(expFail));
     }
 
     @ParameterizedTest
     @CsvSource(
             textBlock =
                     """
-      # trackEvent,  pubType,         expAttempt, expSuccess, expFail
-      true,          success,         1,          1,          0
-      true,          return_failure,   1,          0,          1
-      true,          throw_on_publish,  1,          0,          1
-      false,         success,         0,          0,          0
-      false,         return_failure,   0,          0,          0
-      false,         throw_on_publish,  0,          0,          0
+      # trackEvent,  pubType,           expSuccess, expFail
+      true,          success,           1,          0
+      true,          return_failure,    0,          1
+      true,          throw_on_publish,  0,          1
+      false,         success,           0,          0
+      false,         return_failure,    0,          0
+      false,         throw_on_publish,  0,          0
       """)
     void testCounterForQueryCompleted(
-            boolean trackEvent, String pubType, long expAttempt, long expSuccess, long expFail)
+            boolean trackEvent, String pubType, long expSuccess, long expFail)
             throws InterruptedException {
         var publisher = TestPublisher.from(pubType);
         var config =
@@ -90,34 +89,32 @@ class PubSubEventListenerTest {
                         .topicId("")
                         .encoding(Encoding.JSON)
                         .build();
-        var eventListener = new PubSubEventListener(config, publisher);
+        var countersPerEventType = PubSubEventListenerStats.init();
+        var eventListener = PubSubEventListener.create(config, publisher, countersPerEventType);
 
         eventListener.queryCompleted(TestData.FULL_QUERY_COMPLETED_EVENT);
 
         assertThatEventually(
-                eventListener.getPubSubInfo().getQueryCompleted().attempts()::get,
-                equalTo(expAttempt));
-        assertThatEventually(
-                eventListener.getPubSubInfo().getQueryCompleted().successful()::get,
+                countersPerEventType.getQueryCompleted().published()::getTotalCount,
                 equalTo(expSuccess));
         assertThatEventually(
-                eventListener.getPubSubInfo().getQueryCompleted().failure()::get, equalTo(expFail));
+                countersPerEventType.getQueryCompleted().failed()::getTotalCount, equalTo(expFail));
     }
 
     @ParameterizedTest
     @CsvSource(
             textBlock =
                     """
-      # trackEvent,  pubType,         expAttempt, expSuccess, expFail
-      true,          success,         1,          1,          0
-      true,          return_failure,   1,          0,          1
-      true,          throw_on_publish,  1,          0,          1
-      false,         success,         0,          0,          0
-      false,         return_failure,   0,          0,          0
-      false,         throw_on_publish,  0,          0,          0
+      # trackEvent,  pubType,           expSuccess, expFail
+      true,          success,           1,          0
+      true,          return_failure,    0,          1
+      true,          throw_on_publish,  0,          1
+      false,         success,           0,          0
+      false,         return_failure,    0,          0
+      false,         throw_on_publish,  0,          0
       """)
     void testCounterForSplitCompleted(
-            boolean trackEvent, String pubType, long expAttempt, long expSuccess, long expFail)
+            boolean trackEvent, String pubType, long expSuccess, long expFail)
             throws InterruptedException {
         var publisher = TestPublisher.from(pubType);
         var config =
@@ -129,18 +126,16 @@ class PubSubEventListenerTest {
                         .topicId("")
                         .encoding(Encoding.JSON)
                         .build();
-        var eventListener = new PubSubEventListener(config, publisher);
+        var countersPerEventType = PubSubEventListenerStats.init();
+        var eventListener = PubSubEventListener.create(config, publisher, countersPerEventType);
 
         eventListener.splitCompleted(TestData.FULL_SPLIT_COMPLETED_EVENT);
 
         assertThatEventually(
-                eventListener.getPubSubInfo().getSplitCompleted().attempts()::get,
-                equalTo(expAttempt));
-        assertThatEventually(
-                eventListener.getPubSubInfo().getSplitCompleted().successful()::get,
+                countersPerEventType.getSplitCompleted().published()::getTotalCount,
                 equalTo(expSuccess));
         assertThatEventually(
-                eventListener.getPubSubInfo().getSplitCompleted().failure()::get, equalTo(expFail));
+                countersPerEventType.getSplitCompleted().failed()::getTotalCount, equalTo(expFail));
     }
 
     @Test
@@ -155,7 +150,8 @@ class PubSubEventListenerTest {
                         .topicId("")
                         .encoding(Encoding.JSON)
                         .build();
-        var eventListener = new PubSubEventListener(config, publisher);
+        var eventListener =
+                PubSubEventListener.create(config, publisher, PubSubEventListenerStats.init());
 
         eventListener.queryCreated(TestData.FULL_QUERY_CREATED_EVENT);
 
@@ -174,7 +170,8 @@ class PubSubEventListenerTest {
                         .topicId("")
                         .encoding(Encoding.JSON)
                         .build();
-        var eventListener = new PubSubEventListener(config, publisher);
+        var eventListener =
+                PubSubEventListener.create(config, publisher, PubSubEventListenerStats.init());
 
         eventListener.queryCompleted(TestData.FULL_QUERY_COMPLETED_EVENT);
 
@@ -193,7 +190,8 @@ class PubSubEventListenerTest {
                         .topicId("")
                         .encoding(Encoding.JSON)
                         .build();
-        var eventListener = new PubSubEventListener(config, publisher);
+        var eventListener =
+                PubSubEventListener.create(config, publisher, PubSubEventListenerStats.init());
 
         eventListener.splitCompleted(TestData.FULL_SPLIT_COMPLETED_EVENT);
 
@@ -213,7 +211,8 @@ class PubSubEventListenerTest {
                         .topicId("")
                         .encoding(Encoding.JSON)
                         .build();
-        var eventListener = new PubSubEventListener(config, publisher);
+        var eventListener =
+                PubSubEventListener.create(config, publisher, PubSubEventListenerStats.init());
 
         assertDoesNotThrow(() -> eventListener.close());
         assertThat(publisher.closeCalled, is(true));

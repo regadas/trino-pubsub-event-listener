@@ -1,6 +1,7 @@
 package dev.regadas.trino.pubsub.listener;
 
 import dev.regadas.trino.pubsub.listener.metrics.MBeanRegister;
+import dev.regadas.trino.pubsub.listener.metrics.PubSubEventListenerStats;
 import io.trino.spi.eventlistener.EventListener;
 import io.trino.spi.eventlistener.EventListenerFactory;
 import java.io.IOException;
@@ -18,8 +19,9 @@ public final class PubSubEventListenerFactory implements EventListenerFactory {
         var listenerConfig = PubSubEventListenerConfig.create(config);
 
         try {
-            PubSubEventListener eventListener = PubSubEventListener.create(listenerConfig);
-            MBeanRegister.registerMBean(config, eventListener.getPubSubInfo());
+            PubSubEventListenerStats stats = PubSubEventListenerStats.init();
+            PubSubEventListener eventListener = PubSubEventListener.create(listenerConfig, stats);
+            MBeanRegister.registerMBean(config, stats);
 
             return eventListener;
         } catch (IOException e) {
