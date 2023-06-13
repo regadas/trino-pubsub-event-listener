@@ -23,14 +23,14 @@ public final class PubSubEventListener implements EventListener, AutoCloseable {
     private final Publisher publisher;
     private final PubSubEventListenerStats stats;
 
-    PubSubEventListener(
+    private PubSubEventListener(
             PubSubEventListenerConfig config, Publisher publisher, PubSubEventListenerStats stats) {
         this.config = requireNonNull(config, "config is null");
         this.publisher = requireNonNull(publisher, "publisher is null");
         this.stats = requireNonNull(stats, "countersPerEventType is null");
     }
 
-    public static PubSubEventListener create(
+    public static final PubSubEventListener create(
             PubSubEventListenerConfig config, PubSubEventListenerStats stats) throws IOException {
         var publisher =
                 PubSubPublisher.create(
@@ -38,6 +38,11 @@ public final class PubSubEventListener implements EventListener, AutoCloseable {
                         config.topicId(),
                         config.encoding(),
                         config.credentialsFilePath());
+        return create(config, publisher, stats);
+    }
+
+    public static final PubSubEventListener create(
+            PubSubEventListenerConfig config, Publisher publisher, PubSubEventListenerStats stats) {
         return new PubSubEventListener(config, publisher, stats);
     }
 

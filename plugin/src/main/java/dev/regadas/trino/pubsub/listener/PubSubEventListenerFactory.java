@@ -19,7 +19,7 @@ public final class PubSubEventListenerFactory implements EventListenerFactory {
         var listenerConfig = PubSubEventListenerConfig.create(config);
 
         try {
-            PubSubEventListenerStats stats = new PubSubEventListenerStats();
+            PubSubEventListenerStats stats = PubSubEventListenerStats.init();
             PubSubEventListener eventListener = PubSubEventListener.create(listenerConfig, stats);
             MBeanRegister.registerMBean(config, stats);
 

@@ -52,8 +52,8 @@ class PubSubEventListenerTest {
                         .topicId("")
                         .encoding(Encoding.JSON)
                         .build();
-        var countersPerEventType = new PubSubEventListenerStats();
-        var eventListener = new PubSubEventListener(config, publisher, countersPerEventType);
+        var countersPerEventType = PubSubEventListenerStats.init();
+        var eventListener = PubSubEventListener.create(config, publisher, countersPerEventType);
 
         eventListener.queryCreated(TestData.FULL_QUERY_CREATED_EVENT);
 
@@ -89,8 +89,8 @@ class PubSubEventListenerTest {
                         .topicId("")
                         .encoding(Encoding.JSON)
                         .build();
-        var countersPerEventType = new PubSubEventListenerStats();
-        var eventListener = new PubSubEventListener(config, publisher, countersPerEventType);
+        var countersPerEventType = PubSubEventListenerStats.init();
+        var eventListener = PubSubEventListener.create(config, publisher, countersPerEventType);
 
         eventListener.queryCompleted(TestData.FULL_QUERY_COMPLETED_EVENT);
 
@@ -126,8 +126,8 @@ class PubSubEventListenerTest {
                         .topicId("")
                         .encoding(Encoding.JSON)
                         .build();
-        var countersPerEventType = new PubSubEventListenerStats();
-        var eventListener = new PubSubEventListener(config, publisher, countersPerEventType);
+        var countersPerEventType = PubSubEventListenerStats.init();
+        var eventListener = PubSubEventListener.create(config, publisher, countersPerEventType);
 
         eventListener.splitCompleted(TestData.FULL_SPLIT_COMPLETED_EVENT);
 
@@ -151,7 +151,7 @@ class PubSubEventListenerTest {
                         .encoding(Encoding.JSON)
                         .build();
         var eventListener =
-                new PubSubEventListener(config, publisher, new PubSubEventListenerStats());
+                PubSubEventListener.create(config, publisher, PubSubEventListenerStats.init());
 
         eventListener.queryCreated(TestData.FULL_QUERY_CREATED_EVENT);
 
@@ -171,7 +171,7 @@ class PubSubEventListenerTest {
                         .encoding(Encoding.JSON)
                         .build();
         var eventListener =
-                new PubSubEventListener(config, publisher, new PubSubEventListenerStats());
+                PubSubEventListener.create(config, publisher, PubSubEventListenerStats.init());
 
         eventListener.queryCompleted(TestData.FULL_QUERY_COMPLETED_EVENT);
 
@@ -191,7 +191,7 @@ class PubSubEventListenerTest {
                         .encoding(Encoding.JSON)
                         .build();
         var eventListener =
-                new PubSubEventListener(config, publisher, new PubSubEventListenerStats());
+                PubSubEventListener.create(config, publisher, PubSubEventListenerStats.init());
 
         eventListener.splitCompleted(TestData.FULL_SPLIT_COMPLETED_EVENT);
 
@@ -212,7 +212,7 @@ class PubSubEventListenerTest {
                         .encoding(Encoding.JSON)
                         .build();
         var eventListener =
-                new PubSubEventListener(config, publisher, new PubSubEventListenerStats());
+                PubSubEventListener.create(config, publisher, PubSubEventListenerStats.init());
 
         assertDoesNotThrow(() -> eventListener.close());
         assertThat(publisher.closeCalled, is(true));

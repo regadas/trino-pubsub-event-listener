@@ -5,9 +5,23 @@ import org.weakref.jmx.Managed;
 import org.weakref.jmx.Nested;
 
 public class PubSubEventListenerStats {
-    private final EventCounters queryCreated = EventCounters.create();
-    private final EventCounters queryCompleted = EventCounters.create();
-    private final EventCounters splitCompleted = EventCounters.create();
+    private final EventCounters queryCreated;
+    private final EventCounters queryCompleted;
+    private final EventCounters splitCompleted;
+
+    private PubSubEventListenerStats(
+            EventCounters queryCreated,
+            EventCounters queryCompleted,
+            EventCounters splitCompleted) {
+        this.queryCreated = queryCreated;
+        this.queryCompleted = queryCompleted;
+        this.splitCompleted = splitCompleted;
+    }
+
+    public static final PubSubEventListenerStats init() {
+        return new PubSubEventListenerStats(
+                EventCounters.create(), EventCounters.create(), EventCounters.create());
+    }
 
     @Managed()
     @Nested
