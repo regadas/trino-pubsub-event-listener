@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import com.google.protobuf.Message;
 import dev.regadas.trino.pubsub.listener.Encoder.Encoding;
-import dev.regadas.trino.pubsub.listener.metrics.CountersPerEventType;
+import dev.regadas.trino.pubsub.listener.metrics.PubSubEventListenerStats;
 import dev.regadas.trino.pubsub.listener.proto.Schema;
 import dev.regadas.trino.pubsub.listener.pubsub.Publisher;
 import java.io.IOException;
@@ -31,13 +31,13 @@ class PubSubEventListenerTest {
     @CsvSource(
             textBlock =
                     """
-      # trackEvent,  pubType,           expSuccess, expFail
-      true,          success,           1,          0
-      true,          return_failure,    0,          1
-      true,          throw_on_publish,  0,          1
-      false,         success,           0,          0
-      false,         return_failure,    0,          0
-      false,         throw_on_publish,  0,          0
+      # trackEvent,  pubType,          expSuccess, expFail
+      true,          success,          1,          0
+      true,          return_failure,   0,          1
+      true,          throw_on_publish, 0,          1
+      false,         success,          0,          0
+      false,         return_failure,   0,          0
+      false,         throw_on_publish, 0,          0
       """)
     void testCounterForQueryCreated(
             boolean trackEvent, String pubType, long expSuccess, long expFail)
@@ -52,15 +52,16 @@ class PubSubEventListenerTest {
                         .topicId("")
                         .encoding(Encoding.JSON)
                         .build();
-        var countersPerEventType = CountersPerEventType.create();
+        var countersPerEventType = new PubSubEventListenerStats();
         var eventListener = new PubSubEventListener(config, publisher, countersPerEventType);
 
         eventListener.queryCreated(TestData.FULL_QUERY_CREATED_EVENT);
 
         assertThatEventually(
-                countersPerEventType.queryCreated().succeeded()::getCounter, equalTo(expSuccess));
+                countersPerEventType.getQueryCreated().published()::getTotalCount,
+                equalTo(expSuccess));
         assertThatEventually(
-                countersPerEventType.queryCreated().failed()::getCounter, equalTo(expFail));
+                countersPerEventType.getQueryCreated().failed()::getTotalCount, equalTo(expFail));
     }
 
     @ParameterizedTest
@@ -88,15 +89,16 @@ class PubSubEventListenerTest {
                         .topicId("")
                         .encoding(Encoding.JSON)
                         .build();
-        var countersPerEventType = CountersPerEventType.create();
+        var countersPerEventType = new PubSubEventListenerStats();
         var eventListener = new PubSubEventListener(config, publisher, countersPerEventType);
 
         eventListener.queryCompleted(TestData.FULL_QUERY_COMPLETED_EVENT);
 
         assertThatEventually(
-                countersPerEventType.queryCompleted().succeeded()::getCounter, equalTo(expSuccess));
+                countersPerEventType.getQueryCompleted().published()::getTotalCount,
+                equalTo(expSuccess));
         assertThatEventually(
-                countersPerEventType.queryCompleted().failed()::getCounter, equalTo(expFail));
+                countersPerEventType.getQueryCompleted().failed()::getTotalCount, equalTo(expFail));
     }
 
     @ParameterizedTest
@@ -124,15 +126,16 @@ class PubSubEventListenerTest {
                         .topicId("")
                         .encoding(Encoding.JSON)
                         .build();
-        var countersPerEventType = CountersPerEventType.create();
+        var countersPerEventType = new PubSubEventListenerStats();
         var eventListener = new PubSubEventListener(config, publisher, countersPerEventType);
 
         eventListener.splitCompleted(TestData.FULL_SPLIT_COMPLETED_EVENT);
 
         assertThatEventually(
-                countersPerEventType.splitCompleted().succeeded()::getCounter, equalTo(expSuccess));
+                countersPerEventType.getSplitCompleted().published()::getTotalCount,
+                equalTo(expSuccess));
         assertThatEventually(
-                countersPerEventType.splitCompleted().failed()::getCounter, equalTo(expFail));
+                countersPerEventType.getSplitCompleted().failed()::getTotalCount, equalTo(expFail));
     }
 
     @Test
@@ -148,7 +151,7 @@ class PubSubEventListenerTest {
                         .encoding(Encoding.JSON)
                         .build();
         var eventListener =
-                new PubSubEventListener(config, publisher, CountersPerEventType.create());
+                new PubSubEventListener(config, publisher, new PubSubEventListenerStats());
 
         eventListener.queryCreated(TestData.FULL_QUERY_CREATED_EVENT);
 
@@ -168,7 +171,7 @@ class PubSubEventListenerTest {
                         .encoding(Encoding.JSON)
                         .build();
         var eventListener =
-                new PubSubEventListener(config, publisher, CountersPerEventType.create());
+                new PubSubEventListener(config, publisher, new PubSubEventListenerStats());
 
         eventListener.queryCompleted(TestData.FULL_QUERY_COMPLETED_EVENT);
 
@@ -188,7 +191,7 @@ class PubSubEventListenerTest {
                         .encoding(Encoding.JSON)
                         .build();
         var eventListener =
-                new PubSubEventListener(config, publisher, CountersPerEventType.create());
+                new PubSubEventListener(config, publisher, new PubSubEventListenerStats());
 
         eventListener.splitCompleted(TestData.FULL_SPLIT_COMPLETED_EVENT);
 
@@ -209,7 +212,7 @@ class PubSubEventListenerTest {
                         .encoding(Encoding.JSON)
                         .build();
         var eventListener =
-                new PubSubEventListener(config, publisher, CountersPerEventType.create());
+                new PubSubEventListener(config, publisher, new PubSubEventListenerStats());
 
         assertDoesNotThrow(() -> eventListener.close());
         assertThat(publisher.closeCalled, is(true));

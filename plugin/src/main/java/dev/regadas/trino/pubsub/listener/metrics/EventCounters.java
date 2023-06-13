@@ -2,17 +2,15 @@ package dev.regadas.trino.pubsub.listener.metrics;
 
 import static java.util.Objects.requireNonNull;
 
-public record EventCounters(String eventType, Counter succeeded, Counter failed) {
+import io.airlift.stats.CounterStat;
 
-    private static final String SUCCEEDED = "succeeded";
-    private static final String FAILED = "failed";
-
+public record EventCounters(CounterStat published, CounterStat failed) {
     public EventCounters {
-        requireNonNull(succeeded, "succeeded is null");
+        requireNonNull(published, "published is null");
         requireNonNull(failed, "failed is null");
     }
 
-    public static EventCounters create(String eventType) {
-        return new EventCounters(eventType, new Counter(SUCCEEDED), new Counter(FAILED));
+    public static EventCounters create() {
+        return new EventCounters(new CounterStat(), new CounterStat());
     }
 }
