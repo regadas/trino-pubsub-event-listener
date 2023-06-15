@@ -17,7 +17,7 @@ dependencies {
     def trinoVersion = '419'
     api "io.trino:trino-spi:${trinoVersion}"
 
-    implementation platform('com.google.cloud:libraries-bom:26.16.0')
+    implementation platform('com.google.cloud:libraries-bom:26.17.0')
     implementation 'com.google.cloud:google-cloud-pubsub'
     implementation 'io.airlift:stats:233'
     testImplementation 'org.hamcrest:hamcrest-core:2.2'
