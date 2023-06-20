@@ -5,8 +5,10 @@ import static java.util.Objects.requireNonNull;
 import io.airlift.stats.DecayCounter;
 import java.util.List;
 import java.util.function.Function;
+import javax.annotation.concurrent.ThreadSafe;
 import org.weakref.jmx.Managed;
 
+@ThreadSafe
 public final class DecayRatio {
     private final DecayCounter numeratorCounter;
     private final List<DecayCounter> denominatorCounters;

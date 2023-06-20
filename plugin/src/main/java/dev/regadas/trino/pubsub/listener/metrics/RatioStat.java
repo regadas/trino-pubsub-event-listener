@@ -6,9 +6,11 @@ import io.airlift.stats.CounterStat;
 import io.airlift.stats.DecayCounter;
 import java.util.List;
 import java.util.function.Function;
+import javax.annotation.concurrent.ThreadSafe;
 import org.weakref.jmx.Managed;
 import org.weakref.jmx.Nested;
 
+@ThreadSafe
 public class RatioStat {
     private final CounterStat numeratorCounter;
     private final List<CounterStat> denominatorCounters;
