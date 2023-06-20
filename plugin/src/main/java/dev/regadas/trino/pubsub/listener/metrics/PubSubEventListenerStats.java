@@ -35,6 +35,12 @@ public class PubSubEventListenerStats {
         return queryCreated.failed();
     }
 
+    @Managed()
+    @Nested
+    public RatioStat getFailedRatioQueryCreated() {
+        return queryCreated.failedRatio();
+    }
+
     @Managed
     @Nested
     public CounterStat getPublishedQueryCompleted() {
@@ -47,6 +53,12 @@ public class PubSubEventListenerStats {
         return queryCompleted.failed();
     }
 
+    @Managed()
+    @Nested
+    public RatioStat getFailedRatioQueryCompleted() {
+        return queryCompleted.failedRatio();
+    }
+
     @Managed
     @Nested
     public CounterStat getPublishedSplitCompleted() {
@@ -57,6 +69,12 @@ public class PubSubEventListenerStats {
     @Nested
     public CounterStat getFailedSplitCompleted() {
         return splitCompleted.failed();
+    }
+
+    @Managed()
+    @Nested
+    public RatioStat getFailedRatioSplitCompleted() {
+        return splitCompleted.failedRatio();
     }
 
     public EventCounters getQueryCreated() {
