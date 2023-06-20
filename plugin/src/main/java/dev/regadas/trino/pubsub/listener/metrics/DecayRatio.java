@@ -4,32 +4,35 @@ import static java.util.Objects.requireNonNull;
 
 import io.airlift.stats.DecayCounter;
 import java.util.List;
+import java.util.function.Function;
 import org.weakref.jmx.Managed;
 
 public final class DecayRatio {
-    private final DecayCounter specialCounter;
-    private final List<DecayCounter> restCounters;
+    private final DecayCounter numeratorCounter;
+    private final List<DecayCounter> denominatorCounters;
 
-    public DecayRatio(DecayCounter specialCounter, DecayCounter restCounter) {
-        this(specialCounter, List.of(restCounter));
+    public DecayRatio(DecayCounter numeratorCounter, DecayCounter denominatorCounter) {
+        this(numeratorCounter, List.of(denominatorCounter));
     }
 
-    public DecayRatio(DecayCounter specialCounter, List<DecayCounter> restCounters) {
-        this.specialCounter = requireNonNull(specialCounter);
-        this.restCounters = requireNonNull(restCounters);
+    public DecayRatio(DecayCounter numeratorCounter, List<DecayCounter> denominatorCounters) {
+        this.numeratorCounter = requireNonNull(numeratorCounter);
+        this.denominatorCounters = requireNonNull(denominatorCounters);
     }
 
     @Managed
     public synchronized double getCount() {
-        double special = specialCounter.getCount();
-        double total = restCounters.stream().mapToDouble(DecayCounter::getCount).sum() + special;
-        return special / total;
+        return computeRatio(DecayCounter::getCount);
     }
 
     @Managed
     public synchronized double getRate() {
-        double special = specialCounter.getRate();
-        double total = restCounters.stream().mapToDouble(DecayCounter::getRate).sum() + special;
-        return special / total;
+        return computeRatio(DecayCounter::getRate);
+    }
+
+    private double computeRatio(Function<DecayCounter, Double> toDouble) {
+        double numerator = toDouble.apply(numeratorCounter);
+        double total = denominatorCounters.stream().mapToDouble(toDouble::apply).sum() + numerator;
+        return numerator / total;
     }
 }

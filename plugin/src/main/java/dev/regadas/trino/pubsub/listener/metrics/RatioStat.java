@@ -10,24 +10,26 @@ import org.weakref.jmx.Managed;
 import org.weakref.jmx.Nested;
 
 public class RatioStat {
-    private final CounterStat specialCounter;
-    private final List<CounterStat> restCounters;
+    private final CounterStat numeratorCounter;
+    private final List<CounterStat> denominatorCounters;
     private final DecayRatio oneMinute;
     private final DecayRatio fiveMinute;
     private final DecayRatio fifteenMinute;
 
-    public RatioStat(CounterStat specialCounter, CounterStat restCounter) {
-        this(specialCounter, List.of(restCounter));
+    public RatioStat(CounterStat numeratorCounter, CounterStat denominatorCounter) {
+        this(numeratorCounter, List.of(denominatorCounter));
     }
 
-    public RatioStat(CounterStat specialCounter, List<CounterStat> restCounters) {
-        this.specialCounter = requireNonNull(specialCounter);
-        this.restCounters = List.copyOf(requireNonNull(restCounters));
-        this.oneMinute = getDecayCounters(specialCounter, restCounters, CounterStat::getOneMinute);
+    public RatioStat(CounterStat numeratorCounter, List<CounterStat> denominatorCounters) {
+        this.numeratorCounter = requireNonNull(numeratorCounter);
+        this.denominatorCounters = List.copyOf(requireNonNull(denominatorCounters));
+        this.oneMinute =
+                getDecayCounters(numeratorCounter, denominatorCounters, CounterStat::getOneMinute);
         this.fiveMinute =
-                getDecayCounters(specialCounter, restCounters, CounterStat::getFiveMinute);
+                getDecayCounters(numeratorCounter, denominatorCounters, CounterStat::getFiveMinute);
         this.fifteenMinute =
-                getDecayCounters(specialCounter, restCounters, CounterStat::getFifteenMinute);
+                getDecayCounters(
+                        numeratorCounter, denominatorCounters, CounterStat::getFifteenMinute);
     }
 
     private static DecayRatio getDecayCounters(
@@ -41,9 +43,11 @@ public class RatioStat {
 
     @Managed
     public double getTotalRatio() {
-        long special = specialCounter.getTotalCount();
-        long total = restCounters.stream().mapToLong(CounterStat::getTotalCount).sum() + special;
-        return special / (double) total;
+        long numerator = numeratorCounter.getTotalCount();
+        long total =
+                denominatorCounters.stream().mapToLong(CounterStat::getTotalCount).sum()
+                        + numerator;
+        return numerator / (double) total;
     }
 
     @Managed
