@@ -6,6 +6,7 @@ import static java.time.Duration.ofMillis;
 
 import com.google.common.collect.ImmutableMap;
 import io.trino.spi.TrinoWarning;
+import io.trino.spi.connector.CatalogHandle.CatalogVersion;
 import io.trino.spi.connector.StandardWarningCode;
 import io.trino.spi.eventlistener.ColumnDetail;
 import io.trino.spi.eventlistener.ColumnInfo;
@@ -156,6 +157,7 @@ class TestData {
                     List.of(
                             new QueryInputMetadata(
                                     "catalog1",
+                                    new CatalogVersion("v1"),
                                     "schema1",
                                     "table1",
                                     List.of("column1", "column2"),
@@ -165,6 +167,7 @@ class TestData {
                                     OptionalLong.of(202)),
                             new QueryInputMetadata(
                                     "catalog2",
+                                    new CatalogVersion("v1"),
                                     "schema2",
                                     "table2",
                                     List.of("column3", "column4"),
@@ -175,6 +178,7 @@ class TestData {
                     Optional.of(
                             new QueryOutputMetadata(
                                     "catalog3",
+                                    new CatalogVersion("v1"),
                                     "schema3",
                                     "table3",
                                     Optional.of(
