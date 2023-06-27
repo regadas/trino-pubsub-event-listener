@@ -14,7 +14,7 @@ dependencies {
     compileOnly         "com.google.auto.value:auto-value-annotations:${autoValueVersion}"
     annotationProcessor "com.google.auto.value:auto-value:${autoValueVersion}"
 
-    def trinoVersion = '419'
+    def trinoVersion = '420'
     api "io.trino:trino-spi:${trinoVersion}"
 
     implementation platform('com.google.cloud:libraries-bom:26.17.0')
