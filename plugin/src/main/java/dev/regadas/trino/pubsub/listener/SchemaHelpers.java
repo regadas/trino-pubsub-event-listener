@@ -1,17 +1,36 @@
 package dev.regadas.trino.pubsub.listener;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.regadas.trino.pubsub.listener.proto.Schema;
 import dev.regadas.trino.pubsub.listener.proto.Schema.TrinoWarning.Code;
 import io.trino.spi.WarningCode;
+import io.trino.spi.eventlistener.ColumnDetail;
+import io.trino.spi.eventlistener.OutputColumnMetadata;
 import io.trino.spi.eventlistener.QueryCompletedEvent;
 import io.trino.spi.eventlistener.QueryContext;
 import io.trino.spi.eventlistener.QueryCreatedEvent;
 import io.trino.spi.eventlistener.QueryFailureInfo;
+import io.trino.spi.eventlistener.QueryIOMetadata;
+import io.trino.spi.eventlistener.QueryInputMetadata;
 import io.trino.spi.eventlistener.QueryMetadata;
+import io.trino.spi.eventlistener.QueryOutputMetadata;
 import io.trino.spi.eventlistener.SplitCompletedEvent;
 import io.trino.spi.eventlistener.SplitFailureInfo;
+import java.util.List;
+import java.util.Optional;
 
 public final class SchemaHelpers {
+
+    private static ObjectMapper mapper = new ObjectMapper();
+
+    static Optional<String> jsonify(java.lang.Object obj) {
+        try {
+            return Optional.of(mapper.writeValueAsString(obj));
+        } catch (JsonProcessingException exc) {
+            return Optional.empty();
+        }
+    }
 
     static Schema.Duration from(java.time.Duration duration) {
         return Schema.Duration.newBuilder()
@@ -53,6 +72,75 @@ public final class SchemaHelpers {
         context.getQueryType().map(Object::toString).ifPresent(contextBuilder::setQueryType);
 
         return contextBuilder.build();
+    }
+
+    static Schema.QueryIOMetadata from(QueryIOMetadata ioMetadata) {
+        var inputs = ioMetadata.getInputs().stream().map(SchemaHelpers::from).toList();
+        var output = ioMetadata.getOutput().map(SchemaHelpers::from);
+        var ioMeta = Schema.QueryIOMetadata.newBuilder().addAllInputs(inputs);
+        output.ifPresent(ioMeta::setOutput);
+        return ioMeta.build();
+    }
+
+    static Schema.QueryInputMetadata from(QueryInputMetadata inputMetadata) {
+        var inputMetadataBuilder =
+                Schema.QueryInputMetadata.newBuilder()
+                        .setCatalogName(inputMetadata.getCatalogName())
+                        .setSchema(inputMetadata.getSchema())
+                        .setTable(inputMetadata.getTable())
+                        .addAllColumns(inputMetadata.getColumns());
+
+        inputMetadata
+                .getConnectorInfo()
+                .flatMap(SchemaHelpers::jsonify)
+                .ifPresent(inputMetadataBuilder::setConnectorInfo);
+
+        jsonify(inputMetadata.getConnectorMetrics())
+                .ifPresent(inputMetadataBuilder::setConnectorMetrics);
+        inputMetadata.getPhysicalInputRows().ifPresent(inputMetadataBuilder::setPhysicalInputRows);
+        inputMetadata
+                .getPhysicalInputBytes()
+                .ifPresent(inputMetadataBuilder::setPhysicalInputBytes);
+
+        return inputMetadataBuilder.build();
+    }
+
+    static Schema.ColumnDetail from(ColumnDetail columnDetail) {
+        return Schema.ColumnDetail.newBuilder()
+                .setCatalog(columnDetail.getCatalog())
+                .setSchema(columnDetail.getSchema())
+                .setTable(columnDetail.getTable())
+                .setColumnName(columnDetail.getColumnName())
+                .build();
+    }
+
+    static Schema.OutputColumnMetadata from(OutputColumnMetadata columnMetadata) {
+        return Schema.OutputColumnMetadata.newBuilder()
+                .setColumnName(columnMetadata.getColumnName())
+                .setColumnType(columnMetadata.getColumnType())
+                .addAllSourceColumns(
+                        columnMetadata.getSourceColumns().stream()
+                                .map(SchemaHelpers::from)
+                                .toList())
+                .build();
+    }
+
+    static Schema.QueryOutputMetadata from(QueryOutputMetadata output) {
+        var outputMetaBuilder =
+                Schema.QueryOutputMetadata.newBuilder()
+                        .setCatalogName(output.getCatalogName())
+                        .setSchema(output.getSchema())
+                        .setTable(output.getTable());
+
+        output.getColumns()
+                .map(List::stream)
+                .map(s -> s.map(SchemaHelpers::from).toList())
+                .ifPresent(outputMetaBuilder::addAllColumns);
+
+        output.getJsonLengthLimitExceeded()
+                .ifPresent(outputMetaBuilder::setJsonLengthLimitExceeded);
+
+        return outputMetaBuilder.build();
     }
 
     static Schema.QueryMetadata from(QueryMetadata metadata) {
@@ -264,6 +352,8 @@ public final class SchemaHelpers {
                                                 .build())
                         .toList();
 
+        var ioMeta = SchemaHelpers.from(event.getIoMetadata());
+
         var builder =
                 Schema.QueryCompletedEvent.newBuilder()
                         .setMetadata(from(event.getMetadata()))
@@ -272,7 +362,8 @@ public final class SchemaHelpers {
                         .setCreateTime(from(event.getCreateTime()))
                         .setExecutionStartTime(from(event.getExecutionStartTime()))
                         .setEndTime(from(event.getEndTime()))
-                        .addAllWarnings(warnings);
+                        .addAllWarnings(warnings)
+                        .setIoMetadata(ioMeta);
         event.getFailureInfo().map(SchemaHelpers::from).ifPresent(builder::setFailureInfo);
 
         return builder.build();

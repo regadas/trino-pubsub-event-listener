@@ -31,7 +31,10 @@ public interface Encoder<T> {
     @FunctionalInterface
     interface MessageEncoder extends Encoder<Message> {
         JsonFormat.Printer JSON_PRINTER =
-                JsonFormat.printer().preservingProtoFieldNames().omittingInsignificantWhitespace();
+                JsonFormat.printer()
+                        .preservingProtoFieldNames()
+                        .omittingInsignificantWhitespace()
+                        .includingDefaultValueFields();
 
         static MessageEncoder create(Encoding encoding) {
             return switch (encoding) {
