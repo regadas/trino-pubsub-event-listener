@@ -19,15 +19,24 @@ import io.trino.spi.eventlistener.SplitCompletedEvent;
 import io.trino.spi.eventlistener.SplitFailureInfo;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public final class SchemaHelpers {
 
     private static ObjectMapper mapper = new ObjectMapper();
+    private static final Logger LOG = Logger.getLogger(SchemaHelpers.class.getPackage().getName());
 
-    private static Optional<String> jsonify(Object obj) {
+    private static Optional<String> jsonify(Object obj, String prop) {
         try {
             return Optional.of(mapper.writeValueAsString(obj));
         } catch (JsonProcessingException exc) {
+            LOG.log(
+                    Level.WARNING,
+                    "Could not serialize property: "
+                            + prop
+                            + " with type: "
+                            + obj.getClass().getCanonicalName());
             return Optional.empty();
         }
     }
@@ -92,10 +101,10 @@ public final class SchemaHelpers {
 
         inputMetadata
                 .getConnectorInfo()
-                .flatMap(SchemaHelpers::jsonify)
+                .flatMap(connInfo -> SchemaHelpers.jsonify(connInfo, "connectorInfo"))
                 .ifPresent(inputMetadataBuilder::setConnectorInfo);
 
-        jsonify(inputMetadata.getConnectorMetrics())
+        jsonify(inputMetadata.getConnectorMetrics(), "connectorMetrics")
                 .ifPresent(inputMetadataBuilder::setConnectorMetrics);
         inputMetadata.getPhysicalInputRows().ifPresent(inputMetadataBuilder::setPhysicalInputRows);
         inputMetadata
