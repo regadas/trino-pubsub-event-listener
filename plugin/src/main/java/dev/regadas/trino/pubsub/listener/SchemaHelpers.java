@@ -24,7 +24,7 @@ public final class SchemaHelpers {
 
     private static ObjectMapper mapper = new ObjectMapper();
 
-    static Optional<String> jsonify(java.lang.Object obj) {
+    private static Optional<String> jsonify(Object obj) {
         try {
             return Optional.of(mapper.writeValueAsString(obj));
         } catch (JsonProcessingException exc) {
