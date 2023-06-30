@@ -5,12 +5,18 @@ import static dev.regadas.trino.pubsub.listener.SchemaMatchers.timestampEqualTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 
+import io.trino.spi.eventlistener.ColumnDetail;
+import io.trino.spi.eventlistener.OutputColumnMetadata;
 import io.trino.spi.eventlistener.QueryCompletedEvent;
 import io.trino.spi.eventlistener.QueryContext;
 import io.trino.spi.eventlistener.QueryCreatedEvent;
 import io.trino.spi.eventlistener.QueryFailureInfo;
+import io.trino.spi.eventlistener.QueryIOMetadata;
+import io.trino.spi.eventlistener.QueryInputMetadata;
 import io.trino.spi.eventlistener.QueryMetadata;
+import io.trino.spi.eventlistener.QueryOutputMetadata;
 import io.trino.spi.eventlistener.SplitCompletedEvent;
 import io.trino.spi.eventlistener.SplitFailureInfo;
 import java.time.Instant;
@@ -40,6 +46,68 @@ class SchemaHelpersTest {
         assertThat(schema.getQueryState(), is(metadata.getQueryState()));
     }
 
+    private void fromQueryInputMetadata(QueryInputMetadata inputMetadata) {
+        var schema = SchemaHelpers.from(inputMetadata);
+        assertThat(schema.getSchema(), is(inputMetadata.getSchema()));
+        assertThat(schema.getCatalogName(), is(inputMetadata.getCatalogName()));
+
+        assertThat(schema.getConnectorMetrics(), is(notNullValue()));
+
+        inputMetadata
+                .getConnectorInfo()
+                .ifPresent(expected -> assertThat(schema.getConnectorInfo(), is(notNullValue())));
+        inputMetadata
+                .getPhysicalInputBytes()
+                .ifPresent(expected -> assertThat(schema.getPhysicalInputBytes(), is(expected)));
+        inputMetadata
+                .getPhysicalInputRows()
+                .ifPresent(expected -> assertThat(schema.getPhysicalInputRows(), is(expected)));
+    }
+
+    private void fromOutputColumnMetadata(OutputColumnMetadata outputColumnMetadata) {
+        var schema = SchemaHelpers.from(outputColumnMetadata);
+
+        assertThat(schema.getColumnName(), is(outputColumnMetadata.getColumnName()));
+        assertThat(schema.getColumnType(), is(outputColumnMetadata.getColumnType()));
+        outputColumnMetadata.getSourceColumns().forEach(this::fromColumnDetail);
+    }
+
+    private void fromQueryOutputMetadata(QueryOutputMetadata outputMetadata) {
+        var schema = SchemaHelpers.from(outputMetadata);
+
+        assertThat(outputMetadata.getSchema(), is(schema.getSchema()));
+        assertThat(outputMetadata.getTable(), is(schema.getTable()));
+        assertThat(outputMetadata.getCatalogName(), is(schema.getCatalogName()));
+
+        outputMetadata.getColumns().ifPresent(cols -> cols.forEach(this::fromOutputColumnMetadata));
+        outputMetadata
+                .getConnectorOutputMetadata()
+                .ifPresent(
+                        expected ->
+                                assertThat(
+                                        schema.getConnectorOutputMetadata(), is(notNullValue())));
+        outputMetadata
+                .getJsonLengthLimitExceeded()
+                .ifPresent(
+                        expected -> assertThat(schema.getJsonLengthLimitExceeded(), is(expected)));
+    }
+
+    private void fromColumnDetail(ColumnDetail columnDetail) {
+        var schema = SchemaHelpers.from(columnDetail);
+        assertThat(schema.getSchema(), is(columnDetail.getSchema()));
+        assertThat(schema.getCatalog(), is(columnDetail.getCatalog()));
+        assertThat(schema.getTable(), is(columnDetail.getTable()));
+        assertThat(schema.getColumnName(), is(columnDetail.getColumnName()));
+    }
+
+    private void fromQueryIoMetadata(QueryIOMetadata metadata) {
+        var schema = SchemaHelpers.from(metadata);
+
+        assertThat(schema.getInputsCount(), is(metadata.getInputs().size()));
+        metadata.getInputs().forEach(this::fromQueryInputMetadata);
+        metadata.getOutput().ifPresent(this::fromQueryOutputMetadata);
+    }
+
     private void fromQueryFailureInfo(QueryFailureInfo info) {
         var schema = SchemaHelpers.from(info);
 
@@ -63,6 +131,7 @@ class SchemaHelpersTest {
 
         fromQueryContext(event.getContext());
         fromQueryMetadata(event.getMetadata());
+        fromQueryIoMetadata(event.getIoMetadata());
         event.getFailureInfo().ifPresent(this::fromQueryFailureInfo);
     }
 
