@@ -5,7 +5,9 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.fail;
 
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import dev.regadas.trino.pubsub.listener.Encoder.Encoding;
 import dev.regadas.trino.pubsub.listener.metrics.PubSubEventListenerStats;
@@ -156,6 +158,7 @@ class PubSubEventListenerTest {
         eventListener.queryCreated(TestData.FULL_QUERY_CREATED_EVENT);
 
         assertThat(publisher.lastPublishedMessage, instanceOf(Schema.QueryEvent.class));
+        assertThat(parseQueryEvent(publisher.lastPublishedMessage).hasQueryCreated(), is(true));
     }
 
     @Test
@@ -176,6 +179,7 @@ class PubSubEventListenerTest {
         eventListener.queryCompleted(TestData.FULL_QUERY_COMPLETED_EVENT);
 
         assertThat(publisher.lastPublishedMessage, instanceOf(Schema.QueryEvent.class));
+        assertThat(parseQueryEvent(publisher.lastPublishedMessage).hasQueryCompleted(), is(true));
     }
 
     @Test
@@ -196,6 +200,7 @@ class PubSubEventListenerTest {
         eventListener.splitCompleted(TestData.FULL_SPLIT_COMPLETED_EVENT);
 
         assertThat(publisher.lastPublishedMessage, instanceOf(Schema.QueryEvent.class));
+        assertThat(parseQueryEvent(publisher.lastPublishedMessage).hasSplitCompleted(), is(true));
     }
 
     @ParameterizedTest
@@ -291,6 +296,15 @@ class PubSubEventListenerTest {
         @Override
         public void doClose() throws Exception {
             throw new InterruptedException();
+        }
+    }
+
+    static Schema.QueryEvent parseQueryEvent(Message lastPublishedMessage) {
+        try {
+            return Schema.QueryEvent.parseFrom(lastPublishedMessage.toByteString());
+        } catch (InvalidProtocolBufferException e) {
+            fail(e);
+            return null;
         }
     }
 }

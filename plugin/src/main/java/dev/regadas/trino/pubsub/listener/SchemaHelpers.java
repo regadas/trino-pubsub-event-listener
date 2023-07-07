@@ -231,19 +231,27 @@ public final class SchemaHelpers {
         return builder.build();
     }
 
-    static Schema.QueryEvent from(QueryCreatedEvent event) {
+    static Schema.QueryEvent toQueryEvent(QueryCreatedEvent event) {
+        return Schema.QueryEvent.newBuilder().setQueryCreated(from(event)).build();
+    }
 
-        return Schema.QueryEvent.newBuilder()
-                .setQueryCreated(
-                        Schema.QueryCreatedEvent.newBuilder()
-                                .setCreateTime(from(event.getCreateTime()))
-                                .setMetadata(from(event.getMetadata()))
-                                .setContext(from(event.getContext()))
-                                .build())
+    static Schema.QueryEvent toQueryEvent(QueryCompletedEvent event) {
+        return Schema.QueryEvent.newBuilder().setQueryCompleted(from(event)).build();
+    }
+
+    static Schema.QueryEvent toQueryEvent(SplitCompletedEvent event) {
+        return Schema.QueryEvent.newBuilder().setSplitCompleted(from(event)).build();
+    }
+
+    static Schema.QueryCreatedEvent from(QueryCreatedEvent event) {
+        return Schema.QueryCreatedEvent.newBuilder()
+                .setCreateTime(from(event.getCreateTime()))
+                .setMetadata(from(event.getMetadata()))
+                .setContext(from(event.getContext()))
                 .build();
     }
 
-    static Schema.QueryEvent from(QueryCompletedEvent event) {
+    static Schema.QueryCompletedEvent from(QueryCompletedEvent event) {
         var stats = event.getStatistics();
         var gcStats =
                 stats.getStageGcStatistics().stream()
@@ -378,7 +386,7 @@ public final class SchemaHelpers {
                         .setIoMetadata(ioMeta);
         event.getFailureInfo().map(SchemaHelpers::from).ifPresent(builder::setFailureInfo);
 
-        return Schema.QueryEvent.newBuilder().setQueryCompleted(builder.build()).build();
+        return builder.build();
     }
 
     private static Code toSchemaWarningCode(WarningCode warningCode) {
@@ -389,7 +397,7 @@ public final class SchemaHelpers {
     }
 
     @SuppressWarnings("deprecation")
-    static Schema.QueryEvent from(SplitCompletedEvent event) {
+    static Schema.SplitCompletedEvent from(SplitCompletedEvent event) {
         var stats = event.getStatistics();
         var statsBuilder =
                 Schema.SplitStatistics.newBuilder()
@@ -429,6 +437,6 @@ public final class SchemaHelpers {
         event.getStartTime().map(SchemaHelpers::from).ifPresent(builder::setStartTime);
         event.getCatalogName().ifPresent(builder::setCatalogName);
 
-        return Schema.QueryEvent.newBuilder().setSplitCompleted(builder.build()).build();
+        return builder.build();
     }
 }
