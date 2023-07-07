@@ -16,6 +16,14 @@ message Any {
   bytes value = 2;
 }
 
+message QueryEvent {
+  oneof event {
+      QueryCreatedEvent query_created = 1;
+      QueryCompletedEvent query_completed = 2;
+      SplitCompletedEvent split_completed = 3;
+  }
+}
+
 message QueryCreatedEvent {
   QueryMetadata metadata = 1;
   QueryContext context = 2;
