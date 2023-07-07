@@ -155,7 +155,7 @@ class PubSubEventListenerTest {
 
         eventListener.queryCreated(TestData.FULL_QUERY_CREATED_EVENT);
 
-        assertThat(publisher.lastPublishedMessage, instanceOf(Schema.QueryCreatedEvent.class));
+        assertThat(publisher.lastPublishedMessage, instanceOf(Schema.QueryEvent.class));
     }
 
     @Test
@@ -175,7 +175,7 @@ class PubSubEventListenerTest {
 
         eventListener.queryCompleted(TestData.FULL_QUERY_COMPLETED_EVENT);
 
-        assertThat(publisher.lastPublishedMessage, instanceOf(Schema.QueryCompletedEvent.class));
+        assertThat(publisher.lastPublishedMessage, instanceOf(Schema.QueryEvent.class));
     }
 
     @Test
@@ -195,7 +195,7 @@ class PubSubEventListenerTest {
 
         eventListener.splitCompleted(TestData.FULL_SPLIT_COMPLETED_EVENT);
 
-        assertThat(publisher.lastPublishedMessage, instanceOf(Schema.SplitCompletedEvent.class));
+        assertThat(publisher.lastPublishedMessage, instanceOf(Schema.QueryEvent.class));
     }
 
     @ParameterizedTest

@@ -122,7 +122,7 @@ class SchemaHelpersTest {
     }
 
     private void fromQueryCompletedEvent(QueryCompletedEvent event) {
-        var schema = SchemaHelpers.from(event);
+        var schema = SchemaHelpers.from(event).getQueryCompleted();
 
         assertThat(schema.getCreateTime(), timestampEqualTo(event.getCreateTime()));
         assertThat(schema.getExecutionStartTime(), timestampEqualTo(event.getExecutionStartTime()));
@@ -137,7 +137,7 @@ class SchemaHelpersTest {
 
     @SuppressWarnings("deprecation")
     private void fromSplitCompletedEvent(SplitCompletedEvent event) {
-        var schema = SchemaHelpers.from(event);
+        var schema = SchemaHelpers.from(event).getSplitCompleted();
 
         assertThat(schema.getQueryId(), is(event.getQueryId()));
         assertThat(schema.getStageId(), is(event.getStageId()));
@@ -195,7 +195,7 @@ class SchemaHelpersTest {
     }
 
     private void fromQueryCreatedEvent(QueryCreatedEvent event) {
-        var schema = SchemaHelpers.from(event);
+        var schema = SchemaHelpers.from(event).getQueryCreated();
 
         assertThat(schema.getCreateTime(), timestampEqualTo(event.getCreateTime()));
         fromQueryContext(event.getContext());

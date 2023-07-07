@@ -231,16 +231,19 @@ public final class SchemaHelpers {
         return builder.build();
     }
 
-    static Schema.QueryCreatedEvent from(QueryCreatedEvent event) {
+    static Schema.QueryEvent from(QueryCreatedEvent event) {
 
-        return Schema.QueryCreatedEvent.newBuilder()
-                .setCreateTime(from(event.getCreateTime()))
-                .setMetadata(from(event.getMetadata()))
-                .setContext(from(event.getContext()))
+        return Schema.QueryEvent.newBuilder()
+                .setQueryCreated(
+                        Schema.QueryCreatedEvent.newBuilder()
+                                .setCreateTime(from(event.getCreateTime()))
+                                .setMetadata(from(event.getMetadata()))
+                                .setContext(from(event.getContext()))
+                                .build())
                 .build();
     }
 
-    static Schema.QueryCompletedEvent from(QueryCompletedEvent event) {
+    static Schema.QueryEvent from(QueryCompletedEvent event) {
         var stats = event.getStatistics();
         var gcStats =
                 stats.getStageGcStatistics().stream()
@@ -375,7 +378,7 @@ public final class SchemaHelpers {
                         .setIoMetadata(ioMeta);
         event.getFailureInfo().map(SchemaHelpers::from).ifPresent(builder::setFailureInfo);
 
-        return builder.build();
+        return Schema.QueryEvent.newBuilder().setQueryCompleted(builder.build()).build();
     }
 
     private static Code toSchemaWarningCode(WarningCode warningCode) {
@@ -386,7 +389,7 @@ public final class SchemaHelpers {
     }
 
     @SuppressWarnings("deprecation")
-    static Schema.SplitCompletedEvent from(SplitCompletedEvent event) {
+    static Schema.QueryEvent from(SplitCompletedEvent event) {
         var stats = event.getStatistics();
         var statsBuilder =
                 Schema.SplitStatistics.newBuilder()
@@ -426,6 +429,6 @@ public final class SchemaHelpers {
         event.getStartTime().map(SchemaHelpers::from).ifPresent(builder::setStartTime);
         event.getCatalogName().ifPresent(builder::setCatalogName);
 
-        return builder.build();
+        return Schema.QueryEvent.newBuilder().setSplitCompleted(builder.build()).build();
     }
 }
