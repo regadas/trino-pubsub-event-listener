@@ -231,8 +231,19 @@ public final class SchemaHelpers {
         return builder.build();
     }
 
-    static Schema.QueryCreatedEvent from(QueryCreatedEvent event) {
+    static Schema.QueryEvent toQueryEvent(QueryCreatedEvent event) {
+        return Schema.QueryEvent.newBuilder().setQueryCreated(from(event)).build();
+    }
 
+    static Schema.QueryEvent toQueryEvent(QueryCompletedEvent event) {
+        return Schema.QueryEvent.newBuilder().setQueryCompleted(from(event)).build();
+    }
+
+    static Schema.QueryEvent toQueryEvent(SplitCompletedEvent event) {
+        return Schema.QueryEvent.newBuilder().setSplitCompleted(from(event)).build();
+    }
+
+    static Schema.QueryCreatedEvent from(QueryCreatedEvent event) {
         return Schema.QueryCreatedEvent.newBuilder()
                 .setCreateTime(from(event.getCreateTime()))
                 .setMetadata(from(event.getMetadata()))
