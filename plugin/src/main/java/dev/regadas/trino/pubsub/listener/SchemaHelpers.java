@@ -261,7 +261,7 @@ public final class SchemaHelpers {
                 .build();
     }
 
-    static Schema.QueryCompletedEvent from(QueryCompletedEvent event) {
+    static Schema.QueryStageEvent from(QueryStageEvent event) {
         var stats = event.getStatistics();
         var gcStats =
                 stats.getStageGcStatistics().stream()
@@ -370,7 +370,14 @@ public final class SchemaHelpers {
         stats.getPhysicalInputReadTime()
                 .map(SchemaHelpers::from)
                 .ifPresent(statsBuilder::setPhysicalInputReadTime);
+        var builder = Schema.QueryStagesEvent.newBuilder()
+                        .setQueryId(event.getQueryId())
+                        .setStatistics(statsBuilder);
 
+        return builder.build();
+    }
+
+    static Schema.QueryCompletedEvent from(QueryCompletedEvent event) {
         var warnings =
                 event.getWarnings().stream()
                         .map(
@@ -388,7 +395,6 @@ public final class SchemaHelpers {
                 Schema.QueryCompletedEvent.newBuilder()
                         .setMetadata(from(event.getMetadata()))
                         .setContext(from(event.getContext()))
-                        .setStatistics(statsBuilder)
                         .setCreateTime(from(event.getCreateTime()))
                         .setExecutionStartTime(from(event.getExecutionStartTime()))
                         .setEndTime(from(event.getEndTime()))
