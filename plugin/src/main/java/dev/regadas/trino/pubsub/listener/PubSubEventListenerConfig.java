@@ -20,6 +20,8 @@ public record PubSubEventListenerConfig(
     private static final String PUBSUB_CREDENTIALS_FILE = "pubsub-event-listener.credentials-file";
     private static final String PUBSUB_TRACK_CREATED = "pubsub-event-listener.log-created";
     private static final String PUBSUB_TRACK_COMPLETED = "pubsub-event-listener.log-completed";
+    private static final String PUBSUB_TRACK_ERROR = "pubsub-event-listener.log-error";
+    private static final String PUBSUB_TRACK_STAGES = "pubsub-event-listener.log-staged";
     private static final String PUBSUB_TRACK_COMPLETED_SPLIT = "pubsub-event-listener.log-split";
     private static final String PUBSUB_PROJECT_ID = "pubsub-event-listener.project-id";
     private static final String PUBSUB_TOPIC_ID = "pubsub-event-listener.topic-id";
@@ -39,6 +41,12 @@ public record PubSubEventListenerConfig(
         Builder trackQueryCreatedEvent(boolean trackQueryCreatedEvent);
 
         Builder trackQueryCompletedEvent(boolean trackQueryCompletedEvent);
+
+        Builder trackSplitCompletedEvent(boolean trackSplitCompletedEvent);
+            
+        Builder trackQueryErrorEvent(boolean trackQueryErrorEvent);
+
+        Builder trackQueryStageEvent(boolean trackQueryStageEvent);
 
         Builder trackSplitCompletedEvent(boolean trackSplitCompletedEvent);
 
@@ -63,6 +71,10 @@ public record PubSubEventListenerConfig(
                 getBooleanConfig(config, PUBSUB_TRACK_COMPLETED).orElse(false);
         var trackSplitCompletedEvent =
                 getBooleanConfig(config, PUBSUB_TRACK_COMPLETED_SPLIT).orElse(false);
+        var trackQueryErrorEvent =
+                getBooleanConfig(config, PUBSUB_TRACK_ERROR).orElse(false);
+        var trackSplitStageEvent =
+                getBooleanConfig(config, PUBSUB_TRACK_STAGES).orElse(false);
         var projectId = config.get(PUBSUB_PROJECT_ID);
         var topicId = config.get(PUBSUB_TOPIC_ID);
         var credentialsFilePath = config.get(PUBSUB_CREDENTIALS_FILE);
@@ -73,6 +85,8 @@ public record PubSubEventListenerConfig(
                 .trackQueryCreatedEvent(trackQueryCreatedEvent)
                 .trackQueryCompletedEvent(trackQueryCompletedEvent)
                 .trackSplitCompletedEvent(trackSplitCompletedEvent)
+                .trackQueryErrorEvent(trackQueryErrorEvent)
+                .trackQueryStageEvent(trackSplitStageEvent)
                 .projectId(projectId)
                 .topicId(topicId)
                 .credentialsFilePath(credentialsFilePath)
