@@ -8,19 +8,28 @@ public class PubSubEventListenerStats {
     private final EventCounters queryCreated;
     private final EventCounters queryCompleted;
     private final EventCounters splitCompleted;
+    private final EventCounters queryError;
+    private final EventCounters queryStage;
+
 
     private PubSubEventListenerStats(
             EventCounters queryCreated,
             EventCounters queryCompleted,
-            EventCounters splitCompleted) {
+            EventCounters splitCompleted,
+            EventCounters queryError,
+            EventCounters queryStage
+            ) {
         this.queryCreated = queryCreated;
         this.queryCompleted = queryCompleted;
         this.splitCompleted = splitCompleted;
+        this.queryError = queryError;
+        this.queryStage = queryStage;
     }
 
     public static final PubSubEventListenerStats init() {
         return new PubSubEventListenerStats(
-                EventCounters.create(), EventCounters.create(), EventCounters.create());
+                EventCounters.create(), EventCounters.create(), EventCounters.create(),
+                EventCounters.create(), EventCounters.create());
     }
 
     @Managed()
@@ -87,5 +96,13 @@ public class PubSubEventListenerStats {
 
     public EventCounters getSplitCompleted() {
         return splitCompleted;
+    }
+
+    public EventCounters getQueryError() {
+        return queryError;
+    }
+
+    public EventCounters getQueryStage() {
+        return queryStage;
     }
 }
