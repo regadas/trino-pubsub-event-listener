@@ -21,6 +21,8 @@ message QueryEvent {
       QueryCreatedEvent query_created = 1;
       QueryCompletedEvent query_completed = 2;
       SplitCompletedEvent split_completed = 3;
+      QueryErrorEvent query_error = 4;
+      QueryStagesEvent query_stages = 5;
   }
 }
 
@@ -30,16 +32,24 @@ message QueryCreatedEvent {
   Timestamp create_time = 3;
 }
 
+message QueryErrorEvent {
+  string query_id = 1;
+  QueryFailureInfo failure_info = 2;
+  repeated TrinoWarning warnings = 3;
+}
+      
+message QueryStagesEvent{
+  string query_id = 1;
+  QueryStatistics statistics = 2;
+}
+
 message QueryCompletedEvent {
   QueryMetadata metadata = 1;
-  QueryStatistics statistics = 2;
-  QueryContext context = 3;
-  QueryIOMetadata io_metadata = 4;
-  QueryFailureInfo failure_info = 5;
-  repeated TrinoWarning warnings = 6;
-  Timestamp create_time = 7;
-  Timestamp execution_start_time = 8;
-  Timestamp end_time = 9;
+  QueryContext context = 2;
+  QueryIOMetadata io_metadata = 3;
+  Timestamp create_time = 4;
+  Timestamp execution_start_time = 5;
+  Timestamp end_time = 6;
 }
 
 message TrinoWarning {
