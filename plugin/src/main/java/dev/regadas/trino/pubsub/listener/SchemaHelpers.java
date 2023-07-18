@@ -10,10 +10,12 @@ import io.trino.spi.eventlistener.OutputColumnMetadata;
 import io.trino.spi.eventlistener.QueryCompletedEvent;
 import io.trino.spi.eventlistener.QueryContext;
 import io.trino.spi.eventlistener.QueryCreatedEvent;
+import io.trino.spi.eventlistener.QueryErrorEvent;
 import io.trino.spi.eventlistener.QueryFailureInfo;
 import io.trino.spi.eventlistener.QueryIOMetadata;
 import io.trino.spi.eventlistener.QueryInputMetadata;
 import io.trino.spi.eventlistener.QueryMetadata;
+import io.trino.spi.eventlistener.QueryStageEvent;
 import io.trino.spi.eventlistener.QueryOutputMetadata;
 import io.trino.spi.eventlistener.SplitCompletedEvent;
 import io.trino.spi.eventlistener.SplitFailureInfo;
@@ -238,7 +240,15 @@ public final class SchemaHelpers {
     static Schema.QueryEvent toQueryEvent(QueryCompletedEvent event) {
         return Schema.QueryEvent.newBuilder().setQueryCompleted(from(event)).build();
     }
-
+    
+    static Schema.QueryEvent toQueryEvent(QueryErrorEvent event) {
+        return Schema.QueryEvent.newBuilder().setQueryError(from(event)).build();
+    }
+    
+    static Schema.QueryEvent toQueryEvent(QueryStageEvent event) {
+        return Schema.QueryEvent.newBuilder().setQueryStage(from(event)).build();
+    }
+    
     static Schema.QueryEvent toQueryEvent(SplitCompletedEvent event) {
         return Schema.QueryEvent.newBuilder().setSplitCompleted(from(event)).build();
     }
