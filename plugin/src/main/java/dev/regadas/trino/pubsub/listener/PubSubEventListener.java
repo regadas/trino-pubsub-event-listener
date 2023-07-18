@@ -11,6 +11,8 @@ import io.trino.spi.eventlistener.EventListener;
 import io.trino.spi.eventlistener.QueryCompletedEvent;
 import io.trino.spi.eventlistener.QueryCreatedEvent;
 import io.trino.spi.eventlistener.SplitCompletedEvent;
+import io.trino.spi.eventlistener.QueryErrorEvent;
+import io.trino.spi.eventlistener.QueryStageEvent;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -67,6 +69,19 @@ public final class PubSubEventListener implements EventListener, AutoCloseable {
         }
     }
 
+    @Override
+    public void queryErrored(QueryErrorEvent event) {
+        if (config.trackQueryErrorEvent()) {
+            publish(SchemaHelpers.toQueryEvent(event), stats.getQueryCompleted());
+        }
+    }
+
+    @Override
+    public void queryStaged(QueryStageEvent event) {
+        if (config.trackQueryErrorEvent()) {
+            publish(SchemaHelpers.toQueryEvent(event), stats.getQueryCompleted());
+        }
+    }
     void publish(Message event, EventCounters counters) {
         try {
             var future = publisher.publish(event);
