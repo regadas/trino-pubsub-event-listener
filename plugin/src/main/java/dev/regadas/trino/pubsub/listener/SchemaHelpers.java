@@ -262,17 +262,6 @@ public final class SchemaHelpers {
     }
 
     static Schema.QueryCompletedEvent from(QueryCompletedEvent event) {
-        var warnings =
-                event.getWarnings().stream()
-                        .map(
-                                tw ->
-                                        Schema.TrinoWarning.newBuilder()
-                                                .setMessage(tw.getMessage())
-                                                .setWarningCode(
-                                                        toSchemaWarningCode(tw.getWarningCode()))
-                                                .build())
-                        .toList();
-
         var ioMeta = SchemaHelpers.from(event.getIoMetadata());
 
         var builder =
@@ -282,7 +271,6 @@ public final class SchemaHelpers {
                         .setCreateTime(from(event.getCreateTime()))
                         .setExecutionStartTime(from(event.getExecutionStartTime()))
                         .setEndTime(from(event.getEndTime()))
-                        .addAllWarnings(warnings)
                         .setIoMetadata(ioMeta);
         event.getFailureInfo().map(SchemaHelpers::from).ifPresent(builder::setFailureInfo);
 
