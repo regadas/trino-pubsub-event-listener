@@ -261,6 +261,55 @@ public final class SchemaHelpers {
                 .build();
     }
 
+    static Schema.QueryCompletedEvent from(QueryCompletedEvent event) {
+        var warnings =
+                event.getWarnings().stream()
+                        .map(
+                                tw ->
+                                        Schema.TrinoWarning.newBuilder()
+                                                .setMessage(tw.getMessage())
+                                                .setWarningCode(
+                                                        toSchemaWarningCode(tw.getWarningCode()))
+                                                .build())
+                        .toList();
+
+        var ioMeta = SchemaHelpers.from(event.getIoMetadata());
+
+        var builder =
+                Schema.QueryCompletedEvent.newBuilder()
+                        .setMetadata(from(event.getMetadata()))
+                        .setContext(from(event.getContext()))
+                        .setCreateTime(from(event.getCreateTime()))
+                        .setExecutionStartTime(from(event.getExecutionStartTime()))
+                        .setEndTime(from(event.getEndTime()))
+                        .addAllWarnings(warnings)
+                        .setIoMetadata(ioMeta);
+        event.getFailureInfo().map(SchemaHelpers::from).ifPresent(builder::setFailureInfo);
+
+        return builder.build();
+    }
+    
+    static Schema.QueryErrorEvent from(QueryErrorEvent event) {
+        var warnings =
+                event.getWarnings().stream()
+                        .map(
+                                tw ->
+                                        Schema.TrinoWarning.newBuilder()
+                                                .setMessage(tw.getMessage())
+                                                .setWarningCode(
+                                                        toSchemaWarningCode(tw.getWarningCode()))
+                                                .build())
+                        .toList();
+
+        var builder =
+                Schema.QueryErrorEvent.newBuilder()
+                        .setQueryId(metadata.getQueryId())
+                        .addAllWarnings(warnings);
+        event.getFailureInfo().map(SchemaHelpers::from).ifPresent(builder::setFailureInfo);
+
+        return builder.build();
+    }
+    
     static Schema.QueryStageEvent from(QueryStageEvent event) {
         var stats = event.getStatistics();
         var gcStats =
@@ -373,34 +422,6 @@ public final class SchemaHelpers {
         var builder = Schema.QueryStagesEvent.newBuilder()
                         .setQueryId(event.getQueryId())
                         .setStatistics(statsBuilder);
-
-        return builder.build();
-    }
-
-    static Schema.QueryCompletedEvent from(QueryCompletedEvent event) {
-        var warnings =
-                event.getWarnings().stream()
-                        .map(
-                                tw ->
-                                        Schema.TrinoWarning.newBuilder()
-                                                .setMessage(tw.getMessage())
-                                                .setWarningCode(
-                                                        toSchemaWarningCode(tw.getWarningCode()))
-                                                .build())
-                        .toList();
-
-        var ioMeta = SchemaHelpers.from(event.getIoMetadata());
-
-        var builder =
-                Schema.QueryCompletedEvent.newBuilder()
-                        .setMetadata(from(event.getMetadata()))
-                        .setContext(from(event.getContext()))
-                        .setCreateTime(from(event.getCreateTime()))
-                        .setExecutionStartTime(from(event.getExecutionStartTime()))
-                        .setEndTime(from(event.getEndTime()))
-                        .addAllWarnings(warnings)
-                        .setIoMetadata(ioMeta);
-        event.getFailureInfo().map(SchemaHelpers::from).ifPresent(builder::setFailureInfo);
 
         return builder.build();
     }
