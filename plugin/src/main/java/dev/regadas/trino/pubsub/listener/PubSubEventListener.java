@@ -70,16 +70,16 @@ public final class PubSubEventListener implements EventListener, AutoCloseable {
     }
 
     @Override
-    public void queryErrored(QueryErrorEvent event) {
+    public void queryError(QueryErrorEvent event) {
         if (config.trackQueryErrorEvent()) {
-            publish(SchemaHelpers.toQueryEvent(event), stats.getQueryCompleted());
+            publish(SchemaHelpers.toQueryEvent(event), stats.getQueryError());
         }
     }
 
     @Override
-    public void queryStaged(QueryStageEvent event) {
+    public void queryStages(QueryStageEvent event) {
         if (config.trackQueryErrorEvent()) {
-            publish(SchemaHelpers.toQueryEvent(event), stats.getQueryCompleted());
+            publish(SchemaHelpers.toQueryEvent(event), stats.getQueryStages());
         }
     }
     void publish(Message event, EventCounters counters) {
