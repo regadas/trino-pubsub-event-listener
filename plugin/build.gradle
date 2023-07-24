@@ -20,7 +20,7 @@ dependencies {
 
     implementation platform('com.google.cloud:libraries-bom:26.18.0')
     implementation 'com.google.cloud:google-cloud-pubsub'
-    implementation 'io.airlift:stats:234'
+    implementation 'io.airlift:stats:235'
     testImplementation 'org.hamcrest:hamcrest-core:2.2'
 }
 
