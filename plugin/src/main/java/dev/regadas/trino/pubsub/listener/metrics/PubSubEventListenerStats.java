@@ -9,7 +9,7 @@ public class PubSubEventListenerStats {
     private final EventCounters queryCompleted;
     private final EventCounters splitCompleted;
     private final EventCounters queryError;
-    private final EventCounters queryStage;
+    private final EventCounters queryStages;
 
 
     private PubSubEventListenerStats(
@@ -17,13 +17,13 @@ public class PubSubEventListenerStats {
             EventCounters queryCompleted,
             EventCounters splitCompleted,
             EventCounters queryError,
-            EventCounters queryStage
+            EventCounters queryStages
             ) {
         this.queryCreated = queryCreated;
         this.queryCompleted = queryCompleted;
         this.splitCompleted = splitCompleted;
         this.queryError = queryError;
-        this.queryStage = queryStage;
+        this.queryStages = queryStages;
     }
 
     public static final PubSubEventListenerStats init() {
@@ -102,7 +102,7 @@ public class PubSubEventListenerStats {
         return queryError;
     }
 
-    public EventCounters getQueryStage() {
-        return queryStage;
+    public EventCounters getQueryStages() {
+        return queryStages;
     }
 }
