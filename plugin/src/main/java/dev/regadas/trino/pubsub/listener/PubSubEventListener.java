@@ -37,7 +37,8 @@ public final class PubSubEventListener implements EventListener, AutoCloseable {
                         config.projectId(),
                         config.topicId(),
                         config.encoding(),
-                        config.credentialsFilePath());
+                        config.credentialsFilePath(),
+                        config.batching());
         return create(config, publisher, stats);
     }
 

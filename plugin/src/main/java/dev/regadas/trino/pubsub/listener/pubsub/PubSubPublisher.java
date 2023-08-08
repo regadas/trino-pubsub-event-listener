@@ -5,6 +5,7 @@ import static java.util.Objects.requireNonNull;
 import com.google.api.core.ApiFuture;
 import com.google.api.core.ApiFutureCallback;
 import com.google.api.core.ApiFutures;
+import com.google.api.gax.batching.BatchingSettings;
 import com.google.api.gax.core.FixedCredentialsProvider;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -34,7 +35,8 @@ public class PubSubPublisher implements Publisher {
             String projectId,
             String topicName,
             Encoding encoding,
-            @Nullable String credentialsFilePath)
+            @Nullable String credentialsFilePath,
+            BatchingSettings batchingSettings)
             throws IOException {
         var credentials =
                 (credentialsFilePath == null)
@@ -45,6 +47,7 @@ public class PubSubPublisher implements Publisher {
                 com.google.cloud.pubsub.v1.Publisher.newBuilder(TopicName.of(projectId, topicName))
                         .setCredentialsProvider(FixedCredentialsProvider.create(credentials))
                         .setEnableCompression(true)
+                        .setBatchingSettings(batchingSettings)
                         .build();
 
         var encoder = MessageEncoder.create(encoding);
