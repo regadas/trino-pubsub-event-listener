@@ -2,12 +2,14 @@ package dev.regadas.trino.pubsub.listener;
 
 import static java.util.Objects.requireNonNull;
 
+import com.google.api.gax.batching.BatchingSettings;
 import com.google.auto.value.AutoBuilder;
 import com.google.pubsub.v1.TopicName;
 import dev.regadas.trino.pubsub.listener.Encoder.Encoding;
 import java.util.Map;
 import java.util.Optional;
 import javax.annotation.Nullable;
+import org.threeten.bp.Duration;
 
 public record PubSubEventListenerConfig(
         boolean trackQueryCreatedEvent,
@@ -16,7 +18,8 @@ public record PubSubEventListenerConfig(
         String projectId,
         String topicId,
         @Nullable String credentialsFilePath,
-        Encoding encoding) {
+        Encoding encoding,
+        BatchingSettings batching) {
     private static final String PUBSUB_CREDENTIALS_FILE = "pubsub-event-listener.credentials-file";
     private static final String PUBSUB_TRACK_CREATED = "pubsub-event-listener.log-created";
     private static final String PUBSUB_TRACK_COMPLETED = "pubsub-event-listener.log-completed";
@@ -24,6 +27,20 @@ public record PubSubEventListenerConfig(
     private static final String PUBSUB_PROJECT_ID = "pubsub-event-listener.project-id";
     private static final String PUBSUB_TOPIC_ID = "pubsub-event-listener.topic-id";
     private static final String PUBSUB_ENCODING = "pubsub-event-listener.encoding";
+    private static final String PUBUSUB_BATCHING_DELAY_THRESHOLD =
+            "pubsub-event-listener.batching.delay-threshold";
+    private static final String PUBUSUB_BATCHING_REQUEST_BYTE_THRESHOLD =
+            "pubsub-event-listener.batching.request-byte-threshold";
+    private static final String PUBUSUB_BATCHING_ELEMENT_COUNT_THRESHOLD =
+            "pubsub-event-listener.batching.element-count-threshold";
+
+    private static final boolean PUBSUB_TRACK_CREATED_DEFAULT = false;
+    private static final boolean PUBSUB_TRACK_COMPLETED_DEFAULT = false;
+    private static final boolean PUBSUB_TRACK_COMPLETED_SPLIT_DEFAULT = false;
+    private static final Encoding PUBSUB_ENCODING_DEFAULT = Encoding.JSON;
+    private static final Duration PUBSUB_BATCHING_DELAY_THRESHOLD_DEFAULT = Duration.ofMillis(1);
+    private static final Long PUBSUB_BATCHING_REQUEST_BYTE_THRESHOLD_DEFAULT = 1000L;
+    private static final Long PUBSUB_BATCHING_ELEMENT_COUNT_THRESHOLD_DEFAULT = 100L;
 
     public PubSubEventListenerConfig {
         requireNonNull(projectId, "projectId is null");
@@ -50,24 +67,57 @@ public record PubSubEventListenerConfig(
 
         Builder encoding(Encoding encoding);
 
+        Builder batching(BatchingSettings batching);
+
         PubSubEventListenerConfig build();
     }
 
     public static Builder builder() {
-        return new AutoBuilder_PubSubEventListenerConfig_Builder();
+        return new AutoBuilder_PubSubEventListenerConfig_Builder()
+                .trackQueryCreatedEvent(PUBSUB_TRACK_CREATED_DEFAULT)
+                .trackQueryCompletedEvent(PUBSUB_TRACK_COMPLETED_DEFAULT)
+                .trackSplitCompletedEvent(PUBSUB_TRACK_COMPLETED_SPLIT_DEFAULT)
+                .encoding(PUBSUB_ENCODING_DEFAULT)
+                .batching(
+                        BatchingSettings.newBuilder()
+                                .setDelayThreshold(PUBSUB_BATCHING_DELAY_THRESHOLD_DEFAULT)
+                                .setRequestByteThreshold(
+                                        PUBSUB_BATCHING_REQUEST_BYTE_THRESHOLD_DEFAULT)
+                                .setElementCountThreshold(
+                                        PUBSUB_BATCHING_ELEMENT_COUNT_THRESHOLD_DEFAULT)
+                                .build());
     }
 
     public static PubSubEventListenerConfig create(Map<String, String> config) {
-        var trackQueryCreatedEvent = getBooleanConfig(config, PUBSUB_TRACK_CREATED).orElse(false);
+        var trackQueryCreatedEvent =
+                getConfigValue(config, PUBSUB_TRACK_CREATED)
+                        .map(Boolean::parseBoolean)
+                        .orElse(PUBSUB_TRACK_CREATED_DEFAULT);
         var trackQueryCompletedEvent =
-                getBooleanConfig(config, PUBSUB_TRACK_COMPLETED).orElse(false);
+                getConfigValue(config, PUBSUB_TRACK_COMPLETED)
+                        .map(Boolean::parseBoolean)
+                        .orElse(PUBSUB_TRACK_COMPLETED_DEFAULT);
         var trackSplitCompletedEvent =
-                getBooleanConfig(config, PUBSUB_TRACK_COMPLETED_SPLIT).orElse(false);
+                getConfigValue(config, PUBSUB_TRACK_COMPLETED_SPLIT)
+                        .map(Boolean::parseBoolean)
+                        .orElse(PUBSUB_TRACK_COMPLETED_SPLIT_DEFAULT);
         var projectId = config.get(PUBSUB_PROJECT_ID);
         var topicId = config.get(PUBSUB_TOPIC_ID);
         var credentialsFilePath = config.get(PUBSUB_CREDENTIALS_FILE);
         var encodingConfig = config.get(PUBSUB_ENCODING);
-        var encoding = Encoding.fromOrDefault(encodingConfig, Encoding.JSON);
+        var encoding = Encoding.fromOrDefault(encodingConfig, PUBSUB_ENCODING_DEFAULT);
+        var batchingDelayThreshold =
+                getConfigValue(config, PUBUSUB_BATCHING_DELAY_THRESHOLD)
+                        .map(s -> Duration.ofMillis(Long.parseLong(s)))
+                        .orElse(PUBSUB_BATCHING_DELAY_THRESHOLD_DEFAULT);
+        var batchingRequestByteThreshold =
+                getConfigValue(config, PUBUSUB_BATCHING_REQUEST_BYTE_THRESHOLD)
+                        .map(Long::parseLong)
+                        .orElse(PUBSUB_BATCHING_REQUEST_BYTE_THRESHOLD_DEFAULT);
+        var batchingElementCountThreshold =
+                getConfigValue(config, PUBUSUB_BATCHING_ELEMENT_COUNT_THRESHOLD)
+                        .map(Long::parseLong)
+                        .orElse(PUBSUB_BATCHING_ELEMENT_COUNT_THRESHOLD_DEFAULT);
 
         return builder()
                 .trackQueryCreatedEvent(trackQueryCreatedEvent)
@@ -77,13 +127,16 @@ public record PubSubEventListenerConfig(
                 .topicId(topicId)
                 .credentialsFilePath(credentialsFilePath)
                 .encoding(encoding)
+                .batching(
+                        BatchingSettings.newBuilder()
+                                .setDelayThreshold(batchingDelayThreshold)
+                                .setRequestByteThreshold(batchingRequestByteThreshold)
+                                .setElementCountThreshold(batchingElementCountThreshold)
+                                .build())
                 .build();
     }
 
-    private static Optional<Boolean> getBooleanConfig(
-            Map<String, String> params, String paramName) {
-        return Optional.ofNullable(params.get(paramName))
-                .filter(v -> !v.trim().isEmpty())
-                .map(Boolean::parseBoolean);
+    private static Optional<String> getConfigValue(Map<String, String> params, String paramName) {
+        return Optional.ofNullable(params.get(paramName)).filter(v -> !v.trim().isEmpty());
     }
 }
