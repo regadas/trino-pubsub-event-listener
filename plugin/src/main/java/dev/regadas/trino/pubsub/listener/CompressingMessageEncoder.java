@@ -2,14 +2,13 @@ package dev.regadas.trino.pubsub.listener;
 
 import com.google.protobuf.Message;
 import dev.regadas.trino.pubsub.listener.Encoder.MessageEncoder;
+import io.airlift.compress.zstd.ZstdOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.Objects;
-import java.util.zip.Deflater;
 
 public class CompressingMessageEncoder implements MessageEncoder {
 
-    private static final int BUFFER_SIZE = 32 * 1024;
-    private static final int COMPRESSION_LEVEL = Deflater.BEST_COMPRESSION;
     private final MessageEncoder delegate;
 
     public CompressingMessageEncoder(MessageEncoder delegate) {
@@ -19,22 +18,14 @@ public class CompressingMessageEncoder implements MessageEncoder {
     @Override
     public byte[] encode(Message value) throws Exception {
         var uncompressedBytes = delegate.encode(value);
-        var compressor = new Deflater(COMPRESSION_LEVEL);
-        try {
-            compressor.setInput(uncompressedBytes);
-            compressor.finish();
-
-            var bao = new ByteArrayOutputStream();
-            var readBuffer = new byte[BUFFER_SIZE];
-            while (!compressor.finished()) {
-                var readCount = compressor.deflate(readBuffer);
-                if (readCount > 0) {
-                    bao.write(readBuffer, 0, readCount);
-                }
+        try (var in = new ByteArrayInputStream(uncompressedBytes);
+                var bao = new ByteArrayOutputStream()) {
+            // ZstdOutputStream compress and flushes on close,
+            // so we wrap it on its own try with resources
+            try (var zout = new ZstdOutputStream(bao)) {
+                in.transferTo(zout);
             }
             return bao.toByteArray();
-        } finally {
-            compressor.end();
         }
     }
 }

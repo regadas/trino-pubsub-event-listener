@@ -4,14 +4,15 @@ import static java.util.stream.Collectors.joining;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.lessThan;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.protobuf.Message;
 import dev.regadas.trino.pubsub.listener.Encoder.MessageEncoder;
 import dev.regadas.trino.pubsub.listener.proto.Test.TestMessage;
+import io.airlift.compress.zstd.ZstdInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.stream.Stream;
-import java.util.zip.DataFormatException;
-import java.util.zip.Inflater;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -30,6 +31,7 @@ class CompressingMessageEncoderTest {
     @Test
     void testEncodeActuallyCompress() throws Exception {
         byte[] uncompressed = DELEGATE.encode(MESSAGE);
+
         byte[] compressed = encoder.encode(MESSAGE);
 
         assertThat(compressed.length, lessThan(uncompressed.length));
@@ -37,27 +39,17 @@ class CompressingMessageEncoderTest {
 
     @Test
     void testEncodeCompressionRoundTrip() throws Exception {
-        byte[] uncompressed = DELEGATE.encode(MESSAGE);
         byte[] compressed = encoder.encode(MESSAGE);
-        byte[] decompressed = decompress(compressed, uncompressed.length);
 
+        byte[] decompressed = decompress(compressed);
         assertThat(TestMessage.parseFrom(decompressed), equalTo(MESSAGE));
     }
 
-    public static byte[] decompress(byte[] input, int expectedLength) throws DataFormatException {
-        var decompressor = new Inflater();
-        decompressor.setInput(input);
-
-        try {
-            var decompressed = new byte[expectedLength];
-            decompressor.inflate(decompressed);
-            if (!decompressor.finished()) {
-                fail("decompressed buffer bigger than expected");
-                return null;
-            }
-            return decompressed;
-        } finally {
-            decompressor.end();
+    public static byte[] decompress(byte[] uncompressedBytes) throws IOException {
+        try (var zin = new ZstdInputStream(new ByteArrayInputStream(uncompressedBytes));
+                var bao = new ByteArrayOutputStream()) {
+            zin.transferTo(bao);
+            return bao.toByteArray();
         }
     }
 
