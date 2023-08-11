@@ -13,6 +13,7 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import com.google.pubsub.v1.PubsubMessage;
 import com.google.pubsub.v1.TopicName;
+import dev.regadas.trino.pubsub.listener.CompressingMessageEncoder;
 import dev.regadas.trino.pubsub.listener.Encoder;
 import dev.regadas.trino.pubsub.listener.Encoder.Encoding;
 import dev.regadas.trino.pubsub.listener.Encoder.MessageEncoder;
@@ -50,7 +51,7 @@ public class PubSubPublisher implements Publisher {
                         .setBatchingSettings(batchingSettings)
                         .build();
 
-        var encoder = MessageEncoder.create(encoding);
+        var encoder = new CompressingMessageEncoder(MessageEncoder.create(encoding));
         return new PubSubPublisher(publisher, encoder);
     }
 
