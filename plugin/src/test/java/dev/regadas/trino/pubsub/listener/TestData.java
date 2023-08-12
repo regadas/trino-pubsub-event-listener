@@ -43,7 +43,7 @@ import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.Set;
 
-class TestData {
+public class TestData {
     public static final QueryMetadata FULL_QUERY_METADATA =
             new QueryMetadata(
                     "full_query",

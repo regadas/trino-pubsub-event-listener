@@ -243,7 +243,7 @@ public final class SchemaHelpers {
         return Schema.QueryEvent.newBuilder().setSplitCompleted(from(event)).build();
     }
 
-    static Schema.QueryCreatedEvent from(QueryCreatedEvent event) {
+    public static Schema.QueryCreatedEvent from(QueryCreatedEvent event) {
         return Schema.QueryCreatedEvent.newBuilder()
                 .setCreateTime(from(event.getCreateTime()))
                 .setMetadata(from(event.getMetadata()))
@@ -251,7 +251,7 @@ public final class SchemaHelpers {
                 .build();
     }
 
-    static Schema.QueryCompletedEvent from(QueryCompletedEvent event) {
+    public static Schema.QueryCompletedEvent from(QueryCompletedEvent event) {
         var stats = event.getStatistics();
         var gcStats =
                 stats.getStageGcStatistics().stream()
