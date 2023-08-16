@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
-import dev.regadas.trino.pubsub.listener.Encoder.Encoding;
+import dev.regadas.trino.pubsub.listener.encoder.Encoding;
 import dev.regadas.trino.pubsub.listener.metrics.PubSubEventListenerStats;
 import dev.regadas.trino.pubsub.listener.proto.Schema;
 import dev.regadas.trino.pubsub.listener.pubsub.Publisher;

@@ -13,10 +13,10 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import com.google.pubsub.v1.PubsubMessage;
 import com.google.pubsub.v1.TopicName;
-import dev.regadas.trino.pubsub.listener.CompressingMessageEncoder;
-import dev.regadas.trino.pubsub.listener.Encoder;
-import dev.regadas.trino.pubsub.listener.Encoder.Encoding;
-import dev.regadas.trino.pubsub.listener.Encoder.MessageEncoder;
+import dev.regadas.trino.pubsub.listener.encoder.CompressionEncoder;
+import dev.regadas.trino.pubsub.listener.encoder.Encoder;
+import dev.regadas.trino.pubsub.listener.encoder.Encoding;
+import dev.regadas.trino.pubsub.listener.encoder.MessageEncoder;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
@@ -27,7 +27,8 @@ public class PubSubPublisher implements Publisher {
     private final com.google.cloud.pubsub.v1.Publisher publisher;
     private final Encoder<Message> encoder;
 
-    public PubSubPublisher(com.google.cloud.pubsub.v1.Publisher publisher, MessageEncoder encoder) {
+    public PubSubPublisher(
+            com.google.cloud.pubsub.v1.Publisher publisher, Encoder<Message> encoder) {
         this.publisher = requireNonNull(publisher, "publisher is null");
         this.encoder = requireNonNull(encoder, "encoder is null");
     }
@@ -51,7 +52,7 @@ public class PubSubPublisher implements Publisher {
                         .setBatchingSettings(batchingSettings)
                         .build();
 
-        var encoder = new CompressingMessageEncoder(MessageEncoder.create(encoding));
+        var encoder = CompressionEncoder.create(MessageEncoder.create(encoding));
         return new PubSubPublisher(publisher, encoder);
     }
 

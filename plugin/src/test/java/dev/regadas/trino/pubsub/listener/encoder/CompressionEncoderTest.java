@@ -1,4 +1,4 @@
-package dev.regadas.trino.pubsub.listener;
+package dev.regadas.trino.pubsub.listener.encoder;
 
 import static java.util.stream.Collectors.joining;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -6,7 +6,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.lessThan;
 
 import com.google.protobuf.Message;
-import dev.regadas.trino.pubsub.listener.Encoder.MessageEncoder;
 import dev.regadas.trino.pubsub.listener.proto.Test.TestMessage;
 import io.airlift.compress.zstd.ZstdInputStream;
 import java.io.ByteArrayInputStream;
@@ -16,16 +15,16 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class CompressingMessageEncoderTest {
+class CompressionEncoderTest {
 
     private static final String TEXT = Stream.generate(() -> "a").limit(1000).collect(joining());
     private static final TestMessage MESSAGE = TestMessage.newBuilder().setText(TEXT).build();
-    private static final ProtoMessageEncoder DELEGATE = new ProtoMessageEncoder();
-    private CompressingMessageEncoder encoder;
+    private static final Encoder<Message> DELEGATE = new ProtoMessageEncoder();
+    private CompressionEncoder<Message> encoder;
 
     @BeforeEach
     void setUp() {
-        encoder = new CompressingMessageEncoder(DELEGATE);
+        encoder = CompressionEncoder.create(DELEGATE);
     }
 
     @Test

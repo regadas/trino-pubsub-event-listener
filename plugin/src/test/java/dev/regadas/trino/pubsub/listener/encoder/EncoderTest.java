@@ -1,20 +1,17 @@
-package dev.regadas.trino.pubsub.listener;
+package dev.regadas.trino.pubsub.listener.encoder;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.util.JsonFormat;
-
-import dev.regadas.trino.pubsub.listener.Encoder.Encoding;
-import dev.regadas.trino.pubsub.listener.Encoder.MessageEncoder;
+import dev.regadas.trino.pubsub.listener.SchemaHelpers;
+import dev.regadas.trino.pubsub.listener.TestData;
 import dev.regadas.trino.pubsub.listener.proto.Schema.QueryCompletedEvent;
-
+import java.util.stream.Stream;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-
-import java.util.stream.Stream;
 
 class EncoderTest {
 
