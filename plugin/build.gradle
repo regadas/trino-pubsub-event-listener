@@ -18,13 +18,14 @@ dependencies {
     def jacksonVersion = '2.15.2'
     api "io.trino:trino-spi:${trinoVersion}"
     api "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
-    api "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonVersion}"
-    api "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:${jacksonVersion}"
 
     implementation platform('com.google.cloud:libraries-bom:26.22.0')
     implementation 'com.google.cloud:google-cloud-pubsub'
     implementation 'io.airlift:stats:235'
     implementation 'io.airlift:aircompressor:0.25'
+    implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-avro:${jacksonVersion}"
+    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonVersion}"
+    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:${jacksonVersion}"
     testImplementation 'org.hamcrest:hamcrest-core:2.2'
 }
 

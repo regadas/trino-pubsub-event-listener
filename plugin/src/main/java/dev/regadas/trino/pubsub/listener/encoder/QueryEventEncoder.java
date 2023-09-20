@@ -8,7 +8,7 @@ public interface QueryEventEncoder extends Encoder<QueryEvent> {
         return switch (encoding) {
             case JSON -> new JsonQueryEventEncoder();
             case PROTO -> new ProtoQueryEventEncoder();
-            case AVRO -> throw new AssertionError("not yet implemented");
+            case AVRO -> new AvroQueryEventEncoder();
         };
     }
 }
