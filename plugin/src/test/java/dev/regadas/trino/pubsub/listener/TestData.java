@@ -1,25 +1,51 @@
 package dev.regadas.trino.pubsub.listener;
 
-import com.google.common.collect.ImmutableMap;
-import io.trino.spi.TrinoWarning;
-import io.trino.spi.connector.CatalogHandle.CatalogVersion;
-import io.trino.spi.connector.StandardWarningCode;
-import io.trino.spi.eventlistener.*;
-import io.trino.spi.metrics.Metrics;
-import io.trino.spi.resourcegroups.QueryType;
-import io.trino.spi.resourcegroups.ResourceGroupId;
-import io.trino.spi.session.ResourceEstimates;
-
-import java.net.URI;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.util.*;
-
 import static io.trino.spi.StandardErrorCode.GENERIC_INTERNAL_ERROR;
 import static java.lang.Boolean.TRUE;
 import static java.time.Duration.ofMillis;
 import static java.time.ZoneOffset.UTC;
+
+import com.google.common.collect.ImmutableMap;
+import io.trino.spi.TrinoWarning;
+import io.trino.spi.connector.CatalogHandle.CatalogVersion;
+import io.trino.spi.connector.StandardWarningCode;
+import io.trino.spi.eventlistener.ColumnDetail;
+import io.trino.spi.eventlistener.ColumnInfo;
+import io.trino.spi.eventlistener.OutputColumnMetadata;
+import io.trino.spi.eventlistener.QueryCompletedEvent;
+import io.trino.spi.eventlistener.QueryContext;
+import io.trino.spi.eventlistener.QueryCreatedEvent;
+import io.trino.spi.eventlistener.QueryFailureInfo;
+import io.trino.spi.eventlistener.QueryIOMetadata;
+import io.trino.spi.eventlistener.QueryInputMetadata;
+import io.trino.spi.eventlistener.QueryMetadata;
+import io.trino.spi.eventlistener.QueryOutputMetadata;
+import io.trino.spi.eventlistener.QueryPlanOptimizerStatistics;
+import io.trino.spi.eventlistener.QueryStatistics;
+import io.trino.spi.eventlistener.RoutineInfo;
+import io.trino.spi.eventlistener.SplitCompletedEvent;
+import io.trino.spi.eventlistener.SplitFailureInfo;
+import io.trino.spi.eventlistener.SplitStatistics;
+import io.trino.spi.eventlistener.StageCpuDistribution;
+import io.trino.spi.eventlistener.StageGcStatistics;
+import io.trino.spi.eventlistener.StageOutputBufferUtilization;
+import io.trino.spi.eventlistener.TableInfo;
+import io.trino.spi.metrics.Metrics;
+import io.trino.spi.resourcegroups.QueryType;
+import io.trino.spi.resourcegroups.ResourceGroupId;
+import io.trino.spi.session.ResourceEstimates;
+import java.net.URI;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.OptionalLong;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 public class TestData {
     public static final QueryMetadata FULL_QUERY_METADATA =
