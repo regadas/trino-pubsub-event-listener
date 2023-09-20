@@ -2,16 +2,12 @@ package dev.regadas.trino.pubsub.listener;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.fail;
 
-import com.google.protobuf.InvalidProtocolBufferException;
-import com.google.protobuf.Message;
 import dev.regadas.trino.pubsub.listener.encoder.Encoding;
+import dev.regadas.trino.pubsub.listener.event.QueryEvent;
 import dev.regadas.trino.pubsub.listener.metrics.PubSubEventListenerStats;
-import dev.regadas.trino.pubsub.listener.proto.Schema;
 import dev.regadas.trino.pubsub.listener.pubsub.Publisher;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -25,7 +21,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 @SuppressWarnings("ALL")
 class PubSubEventListenerTest {
-
     private static final int RETRY_DELAY = 20;
     private static final int RETRY_COUNT = 5;
 
@@ -157,8 +152,7 @@ class PubSubEventListenerTest {
 
         eventListener.queryCreated(TestData.FULL_QUERY_CREATED_EVENT);
 
-        assertThat(publisher.lastPublishedMessage, instanceOf(Schema.QueryEvent.class));
-        assertThat(parseQueryEvent(publisher.lastPublishedMessage).hasQueryCreated(), is(true));
+        assertThat(publisher.lastPublishedMessage.kind(), is(QueryEvent.Kind.QUERY_CREATED));
     }
 
     @Test
@@ -178,8 +172,7 @@ class PubSubEventListenerTest {
 
         eventListener.queryCompleted(TestData.FULL_QUERY_COMPLETED_EVENT);
 
-        assertThat(publisher.lastPublishedMessage, instanceOf(Schema.QueryEvent.class));
-        assertThat(parseQueryEvent(publisher.lastPublishedMessage).hasQueryCompleted(), is(true));
+        assertThat(publisher.lastPublishedMessage.kind(), is(QueryEvent.Kind.QUERY_COMPLETED));
     }
 
     @Test
@@ -199,8 +192,7 @@ class PubSubEventListenerTest {
 
         eventListener.splitCompleted(TestData.FULL_SPLIT_COMPLETED_EVENT);
 
-        assertThat(publisher.lastPublishedMessage, instanceOf(Schema.QueryEvent.class));
-        assertThat(parseQueryEvent(publisher.lastPublishedMessage).hasSplitCompleted(), is(true));
+        assertThat(publisher.lastPublishedMessage.kind(), is(QueryEvent.Kind.SPLIT_COMPLETED));
     }
 
     @ParameterizedTest
@@ -240,11 +232,11 @@ class PubSubEventListenerTest {
             THROW_ON_CLOSE
         }
 
-        Message lastPublishedMessage;
+        QueryEvent lastPublishedMessage;
         boolean closeCalled;
 
         @Override
-        public CompletableFuture<String> publish(Message message) {
+        public CompletableFuture<String> publish(QueryEvent message) {
             lastPublishedMessage = message;
             return doPublish(message);
         }
@@ -264,7 +256,7 @@ class PubSubEventListenerTest {
             };
         }
 
-        protected CompletableFuture<String> doPublish(Message message) {
+        protected CompletableFuture<String> doPublish(QueryEvent message) {
             return null;
         }
 
@@ -273,21 +265,21 @@ class PubSubEventListenerTest {
 
     static class SuccessPublisher extends TestPublisher {
         @Override
-        public CompletableFuture<String> doPublish(Message message) {
+        public CompletableFuture<String> doPublish(QueryEvent message) {
             return CompletableFuture.completedFuture("1");
         }
     }
 
     static class ReturnFailurePublisher extends TestPublisher {
         @Override
-        public CompletableFuture<String> doPublish(Message message) {
+        public CompletableFuture<String> doPublish(QueryEvent message) {
             return CompletableFuture.failedFuture(new IOException());
         }
     }
 
     static class ThrowOnPublishPublisher extends TestPublisher {
         @Override
-        public CompletableFuture<String> doPublish(Message message) {
+        public CompletableFuture<String> doPublish(QueryEvent message) {
             throw new UncheckedIOException(new IOException());
         }
     }
@@ -296,15 +288,6 @@ class PubSubEventListenerTest {
         @Override
         public void doClose() throws Exception {
             throw new InterruptedException();
-        }
-    }
-
-    static Schema.QueryEvent parseQueryEvent(Message lastPublishedMessage) {
-        try {
-            return Schema.QueryEvent.parseFrom(lastPublishedMessage.toByteString());
-        } catch (InvalidProtocolBufferException e) {
-            fail(e);
-            return null;
         }
     }
 }
