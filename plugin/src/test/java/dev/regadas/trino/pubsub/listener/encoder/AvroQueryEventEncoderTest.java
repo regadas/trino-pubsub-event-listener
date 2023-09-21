@@ -10,6 +10,7 @@ import io.trino.spi.eventlistener.QueryInputMetadata;
 import io.trino.spi.metrics.Metrics;
 import io.trino.spi.session.ResourceEstimates;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -198,5 +199,30 @@ class AvroQueryEventEncoderTest {
         var reader = new GenericDatumReader<GenericRecord>(estimatesSchema);
         var deserialized = reader.read(null, DecoderFactory.get().binaryDecoder(bytes, null));
         assertEquals(expectedInput, deserialized);
+    }
+
+    @Test
+    void allTypesInAvroSchemaShouldBeOnCustomNamespace() {
+        var queyEventSchema = AvroQueryEventEncoder.avroSchema.getAvroSchema();
+        var namespaces = new ArrayList<String>();
+
+        collectSchemas(queyEventSchema, namespaces);
+
+        var dedupedNamespaces = namespaces.stream().distinct().toList();
+        assertEquals(List.of("dev.regadas.trino.pubsub.listener.event"), dedupedNamespaces);
+    }
+
+    private void collectSchemas(Schema schema, List<String> namespaces) {
+        switch (schema.getType()) {
+            case RECORD -> {
+                namespaces.add(schema.getNamespace());
+                schema.getFields().forEach(field -> collectSchemas(field.schema(), namespaces));
+            }
+            case ENUM -> namespaces.add(schema.getNamespace());
+            case ARRAY -> collectSchemas(schema.getElementType(), namespaces);
+            case MAP -> collectSchemas(schema.getValueType(), namespaces);
+            case UNION -> collectSchemas(schema.getTypes().get(1), namespaces);
+            case FIXED, STRING, BYTES, INT, LONG, FLOAT, DOUBLE, BOOLEAN, NULL -> {}
+        }
     }
 }

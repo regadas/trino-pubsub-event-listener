@@ -12,7 +12,6 @@
     "type" : [ "null", {
       "type" : "record",
       "name" : "QueryCompletedEvent",
-      "namespace" : "io.trino.spi.eventlistener",
       "fields" : [ {
         "name" : "context",
         "type" : [ "null", {
@@ -56,7 +55,6 @@
             "type" : [ "null", {
               "type" : "enum",
               "name" : "QueryType",
-              "namespace" : "io.trino.spi.resourcegroups",
               "symbols" : [ "SELECT", "EXPLAIN", "DESCRIBE", "INSERT", "UPDATE", "DELETE", "ANALYZE", "DATA_DEFINITION", "ALTER_TABLE_EXECUTE", "MERGE" ]
             } ]
           }, {
@@ -67,7 +65,6 @@
             "type" : [ "null", {
               "type" : "record",
               "name" : "ResourceEstimates",
-              "namespace" : "io.trino.spi.session",
               "fields" : [ {
                 "name" : "cpuTime",
                 "type" : [ "null", {
@@ -154,7 +151,6 @@
             "type" : [ "null", {
               "type" : "record",
               "name" : "ErrorCode",
-              "namespace" : "io.trino.spi",
               "fields" : [ {
                 "name" : "code",
                 "type" : {
@@ -911,7 +907,6 @@
           "items" : {
             "type" : "record",
             "name" : "TrinoWarning",
-            "namespace" : "io.trino.spi",
             "fields" : [ {
               "name" : "message",
               "type" : [ "null", "string" ]
@@ -941,7 +936,6 @@
     "type" : [ "null", {
       "type" : "record",
       "name" : "QueryCreatedEvent",
-      "namespace" : "io.trino.spi.eventlistener",
       "fields" : [ {
         "name" : "context",
         "type" : [ "null", "QueryContext" ]
@@ -961,7 +955,6 @@
     "type" : [ "null", {
       "type" : "record",
       "name" : "SplitCompletedEvent",
-      "namespace" : "io.trino.spi.eventlistener",
       "fields" : [ {
         "name" : "catalogName",
         "type" : [ "null", "string" ]
