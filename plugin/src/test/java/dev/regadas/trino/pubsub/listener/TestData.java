@@ -30,6 +30,7 @@ import io.trino.spi.eventlistener.StageCpuDistribution;
 import io.trino.spi.eventlistener.StageGcStatistics;
 import io.trino.spi.eventlistener.StageOutputBufferUtilization;
 import io.trino.spi.eventlistener.TableInfo;
+import io.trino.spi.metrics.Count;
 import io.trino.spi.metrics.Metrics;
 import io.trino.spi.resourcegroups.QueryType;
 import io.trino.spi.resourcegroups.ResourceGroupId;
@@ -167,7 +168,7 @@ public class TestData {
                                     "table1",
                                     List.of("column1", "column2"),
                                     Optional.of("connectorInfo1"),
-                                    new Metrics(ImmutableMap.of()),
+                                    new Metrics(ImmutableMap.of("count", new SimpleCount(47))),
                                     OptionalLong.of(201),
                                     OptionalLong.of(202)),
                             new QueryInputMetadata(
@@ -364,4 +365,27 @@ public class TestData {
 
     public static final QueryCreatedEvent FULL_QUERY_CREATED_EVENT =
             new QueryCreatedEvent(BASE_INSTANT, FULL_QUERY_CONTEXT, FULL_QUERY_METADATA);
+
+    public static class SimpleCount implements Count<Long> {
+        private final long value;
+
+        public SimpleCount(long initialValue) {
+            this.value = initialValue;
+        }
+
+        @Override
+        public Long mergeWith(List<Long> others) {
+            return others.stream().mapToLong(i -> i).sum() + value;
+        }
+
+        @Override
+        public long getTotal() {
+            return value;
+        }
+
+        @Override
+        public Long mergeWith(Long other) {
+            return value + other;
+        }
+    }
 }
