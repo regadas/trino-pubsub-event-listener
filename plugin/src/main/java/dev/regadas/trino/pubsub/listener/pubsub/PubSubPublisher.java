@@ -15,7 +15,7 @@ import com.google.pubsub.v1.TopicName;
 import dev.regadas.trino.pubsub.listener.encoder.CompressionEncoder;
 import dev.regadas.trino.pubsub.listener.encoder.Encoder;
 import dev.regadas.trino.pubsub.listener.encoder.Encoding;
-import dev.regadas.trino.pubsub.listener.encoder.QueryEventEncoder;
+import dev.regadas.trino.pubsub.listener.encoder.QueryEventEncoders;
 import dev.regadas.trino.pubsub.listener.event.QueryEvent;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -52,7 +52,7 @@ public class PubSubPublisher implements Publisher {
                         .setBatchingSettings(batchingSettings)
                         .build();
 
-        var encoder = CompressionEncoder.create(QueryEventEncoder.create(encoding));
+        var encoder = CompressionEncoder.create(QueryEventEncoders.create(encoding));
         return new PubSubPublisher(publisher, encoder);
     }
 

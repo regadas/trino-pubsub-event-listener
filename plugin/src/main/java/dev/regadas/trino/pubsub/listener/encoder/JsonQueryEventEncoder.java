@@ -7,7 +7,7 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import dev.regadas.trino.pubsub.listener.event.QueryEvent;
 
-public class JsonQueryEventEncoder implements QueryEventEncoder {
+public class JsonQueryEventEncoder implements Encoder<QueryEvent> {
     private static final ObjectMapper mapper =
             new ObjectMapper()
                     .registerModule(new JavaTimeModule())

@@ -11,7 +11,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.annotations.VisibleForTesting;
 import dev.regadas.trino.pubsub.listener.event.QueryEvent;
 
-public class AvroQueryEventEncoder implements QueryEventEncoder {
+public class AvroQueryEventEncoder implements Encoder<QueryEvent> {
 
     @VisibleForTesting static final AvroSchema avroSchema;
     private static final ObjectMapper mapper =

@@ -23,7 +23,7 @@ import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public final class ProtoQueryEventEncoder implements QueryEventEncoder {
+public final class ProtoQueryEventEncoder implements Encoder<QueryEvent> {
 
     private static final ObjectMapper mapper = new ObjectMapper();
     private static final Logger LOG =
