@@ -1,6 +1,7 @@
 package dev.regadas.trino.pubsub.listener.encoder;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.dataformat.avro.AvroMapper;
 import com.fasterxml.jackson.dataformat.avro.AvroSchema;
 import com.fasterxml.jackson.dataformat.avro.jsr310.AvroJavaTimeModule;
@@ -15,13 +16,14 @@ public class AvroQueryEventEncoder implements Encoder<QueryEvent> {
 
     @VisibleForTesting static final AvroSchema avroSchema;
 
-    public static final AvroMapper MAPPER =
+    private static final AvroMapper MAPPER =
             AvroMapper.builder()
                     .addModule(new Jdk8Module())
                     .addModule(new JavaTimeModule())
                     .addModule(new AvroJavaTimeModule())
                     .addModule(PatchSchemaModule.create())
                     .build();
+    private static final ObjectWriter WRITER;
 
     static {
         var gen = new AvroSchemaGenerator().enableLogicalTypes();
@@ -31,19 +33,16 @@ public class AvroQueryEventEncoder implements Encoder<QueryEvent> {
             throw new RuntimeException("Could not generate avro schema for QueryEvent", e);
         }
         avroSchema = gen.getGeneratedSchema();
+        WRITER = MAPPER.writer(avroSchema);
     }
 
     @Override
     public byte[] encode(QueryEvent event) throws Exception {
-        return encode(event, avroSchema);
+        return WRITER.writeValueAsBytes(event);
     }
 
     @VisibleForTesting
     byte[] encode(Object obj, AvroSchema schema) throws Exception {
         return MAPPER.writer(schema).writeValueAsBytes(obj);
-    }
-
-    public static void main(String[] args) {
-        System.out.println(AvroQueryEventEncoder.avroSchema.getAvroSchema().toString(true));
     }
 }
