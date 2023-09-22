@@ -130,19 +130,19 @@
         "name" : "createTime",
         "type" : [ "null", {
           "type" : "long",
-          "logicalType" : "timestamp-millis"
+          "java-class" : "java.time.Instant"
         } ]
       }, {
         "name" : "endTime",
         "type" : [ "null", {
           "type" : "long",
-          "logicalType" : "timestamp-millis"
+          "java-class" : "java.time.Instant"
         } ]
       }, {
         "name" : "executionStartTime",
         "type" : [ "null", {
           "type" : "long",
-          "logicalType" : "timestamp-millis"
+          "java-class" : "java.time.Instant"
         } ]
       }, {
         "name" : "failureInfo",
@@ -935,7 +935,8 @@
           }
         } ]
       } ]
-    } ]
+    } ],
+    "default" : null
   }, {
     "name" : "queryCreated",
     "type" : [ "null", {
@@ -949,13 +950,14 @@
         "name" : "createTime",
         "type" : [ "null", {
           "type" : "long",
-          "logicalType" : "timestamp-millis"
+          "java-class" : "java.time.Instant"
         } ]
       }, {
         "name" : "metadata",
         "type" : [ "null", "QueryMetadata" ]
       } ]
-    } ]
+    } ],
+    "default" : null
   }, {
     "name" : "splitCompleted",
     "type" : [ "null", {
@@ -969,13 +971,13 @@
         "name" : "createTime",
         "type" : [ "null", {
           "type" : "long",
-          "logicalType" : "timestamp-millis"
+          "java-class" : "java.time.Instant"
         } ]
       }, {
         "name" : "endTime",
         "type" : [ "null", {
           "type" : "long",
-          "logicalType" : "timestamp-millis"
+          "java-class" : "java.time.Instant"
         } ]
       }, {
         "name" : "failureInfo",
@@ -1003,7 +1005,7 @@
         "name" : "startTime",
         "type" : [ "null", {
           "type" : "long",
-          "logicalType" : "timestamp-millis"
+          "java-class" : "java.time.Instant"
         } ]
       }, {
         "name" : "statistics",
@@ -1064,6 +1066,7 @@
         "name" : "taskId",
         "type" : [ "null", "string" ]
       } ]
-    } ]
+    } ],
+    "default" : null
   } ]
 }

@@ -19,13 +19,13 @@ public abstract class QueryEvent {
 
     public abstract Kind kind();
 
-    @JsonProperty("queryCreated")
+    @JsonProperty(value = "queryCreated", defaultValue = "null")
     public abstract Optional<QueryCreatedEvent> queryCreated();
 
-    @JsonProperty("queryCompleted")
+    @JsonProperty(value = "queryCompleted", defaultValue = "null")
     public abstract Optional<QueryCompletedEvent> queryCompleted();
 
-    @JsonProperty("splitCompleted")
+    @JsonProperty(value = "splitCompleted", defaultValue = "null")
     public abstract Optional<SplitCompletedEvent> splitCompleted();
 
     public static QueryEvent queryCreated(QueryCreatedEvent event) {

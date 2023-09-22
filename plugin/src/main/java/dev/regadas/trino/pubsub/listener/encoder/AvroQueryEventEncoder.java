@@ -26,7 +26,7 @@ public class AvroQueryEventEncoder implements Encoder<QueryEvent> {
     private static final ObjectWriter WRITER;
 
     static {
-        var gen = new AvroSchemaGenerator().enableLogicalTypes();
+        var gen = new AvroSchemaGenerator();
         try {
             MAPPER.acceptJsonFormatVisitor(QueryEvent.class, gen);
         } catch (JsonMappingException e) {
