@@ -42,4 +42,8 @@ public class AvroQueryEventEncoder implements Encoder<QueryEvent> {
     byte[] encode(Object obj, AvroSchema schema) throws Exception {
         return MAPPER.writer(schema).writeValueAsBytes(obj);
     }
+
+    public static void main(String[] args) {
+        System.out.println(AvroQueryEventEncoder.avroSchema.getAvroSchema().toString(true));
+    }
 }
