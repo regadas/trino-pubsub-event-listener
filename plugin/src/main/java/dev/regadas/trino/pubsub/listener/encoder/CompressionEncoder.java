@@ -8,7 +8,7 @@ import java.util.Objects;
 @FunctionalInterface
 public interface CompressionEncoder<T> extends Encoder<T> {
 
-    public static <T> CompressionEncoder<T> create(Encoder<T> delegate) {
+    static <T> CompressionEncoder<T> create(Encoder<T> delegate) {
         Objects.requireNonNull(delegate);
 
         return value -> {

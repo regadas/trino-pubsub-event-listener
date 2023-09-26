@@ -15,13 +15,17 @@ dependencies {
     annotationProcessor "com.google.auto.value:auto-value:${autoValueVersion}"
 
     def trinoVersion = '425'
+    def jacksonVersion = '2.15.2'
     api "io.trino:trino-spi:${trinoVersion}"
-    api "com.fasterxml.jackson.core:jackson-databind:2.15.2"
+    api "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
 
     implementation platform('com.google.cloud:libraries-bom:26.23.0')
     implementation 'com.google.cloud:google-cloud-pubsub'
     implementation 'io.airlift:stats:235'
     implementation 'io.airlift:aircompressor:0.25'
+    implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-avro:${jacksonVersion}"
+    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonVersion}"
+    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:${jacksonVersion}"
     testImplementation 'org.hamcrest:hamcrest-core:2.2'
 }
 

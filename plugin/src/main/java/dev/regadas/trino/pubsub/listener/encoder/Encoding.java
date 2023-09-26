@@ -4,7 +4,8 @@ import java.util.Optional;
 
 public enum Encoding {
     JSON,
-    PROTO;
+    PROTO,
+    AVRO;
 
     public static Optional<Encoding> from(String encoding) {
         if (encoding == null) {

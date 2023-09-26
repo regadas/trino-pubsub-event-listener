@@ -1,31 +1,21 @@
-package dev.regadas.trino.pubsub.listener;
+package dev.regadas.trino.pubsub.listener.encoder;
 
-import static dev.regadas.trino.pubsub.listener.SchemaMatchers.durationEqualTo;
-import static dev.regadas.trino.pubsub.listener.SchemaMatchers.timestampEqualTo;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.*;
 
-import io.trino.spi.eventlistener.ColumnDetail;
-import io.trino.spi.eventlistener.OutputColumnMetadata;
-import io.trino.spi.eventlistener.QueryCompletedEvent;
-import io.trino.spi.eventlistener.QueryContext;
-import io.trino.spi.eventlistener.QueryCreatedEvent;
-import io.trino.spi.eventlistener.QueryFailureInfo;
-import io.trino.spi.eventlistener.QueryIOMetadata;
-import io.trino.spi.eventlistener.QueryInputMetadata;
-import io.trino.spi.eventlistener.QueryMetadata;
-import io.trino.spi.eventlistener.QueryOutputMetadata;
-import io.trino.spi.eventlistener.SplitCompletedEvent;
-import io.trino.spi.eventlistener.SplitFailureInfo;
+import dev.regadas.trino.pubsub.listener.TestData;
+import dev.regadas.trino.pubsub.listener.proto.Schema;
+import io.trino.spi.eventlistener.*;
 import java.time.Instant;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+import org.hamcrest.TypeSafeMatcher;
 import org.junit.jupiter.api.Test;
 
-class SchemaHelpersTest {
+class ProtoQueryEventEncoderTest {
 
     private void fromQueryContext(QueryContext context) {
-        var schema = SchemaHelpers.from(context);
+        var schema = ProtoQueryEventEncoder.from(context);
 
         assertThat(schema.getSchema(), equalTo(context.getSchema().orElse("")));
         assertThat(schema.getCatalog(), equalTo(context.getCatalog().orElse("")));
@@ -39,7 +29,7 @@ class SchemaHelpersTest {
     }
 
     private void fromQueryMetadata(QueryMetadata metadata) {
-        var schema = SchemaHelpers.from(metadata);
+        var schema = ProtoQueryEventEncoder.from(metadata);
 
         assertThat(schema.getQueryId(), is(metadata.getQueryId()));
         assertThat(schema.getQuery(), is(metadata.getQuery()));
@@ -47,7 +37,7 @@ class SchemaHelpersTest {
     }
 
     private void fromQueryInputMetadata(QueryInputMetadata inputMetadata) {
-        var schema = SchemaHelpers.from(inputMetadata);
+        var schema = ProtoQueryEventEncoder.from(inputMetadata);
         assertThat(schema.getSchema(), is(inputMetadata.getSchema()));
         assertThat(schema.getCatalogName(), is(inputMetadata.getCatalogName()));
 
@@ -65,7 +55,7 @@ class SchemaHelpersTest {
     }
 
     private void fromOutputColumnMetadata(OutputColumnMetadata outputColumnMetadata) {
-        var schema = SchemaHelpers.from(outputColumnMetadata);
+        var schema = ProtoQueryEventEncoder.from(outputColumnMetadata);
 
         assertThat(schema.getColumnName(), is(outputColumnMetadata.getColumnName()));
         assertThat(schema.getColumnType(), is(outputColumnMetadata.getColumnType()));
@@ -73,7 +63,7 @@ class SchemaHelpersTest {
     }
 
     private void fromQueryOutputMetadata(QueryOutputMetadata outputMetadata) {
-        var schema = SchemaHelpers.from(outputMetadata);
+        var schema = ProtoQueryEventEncoder.from(outputMetadata);
 
         assertThat(outputMetadata.getSchema(), is(schema.getSchema()));
         assertThat(outputMetadata.getTable(), is(schema.getTable()));
@@ -93,7 +83,7 @@ class SchemaHelpersTest {
     }
 
     private void fromColumnDetail(ColumnDetail columnDetail) {
-        var schema = SchemaHelpers.from(columnDetail);
+        var schema = ProtoQueryEventEncoder.from(columnDetail);
         assertThat(schema.getSchema(), is(columnDetail.getSchema()));
         assertThat(schema.getCatalog(), is(columnDetail.getCatalog()));
         assertThat(schema.getTable(), is(columnDetail.getTable()));
@@ -101,7 +91,7 @@ class SchemaHelpersTest {
     }
 
     private void fromQueryIoMetadata(QueryIOMetadata metadata) {
-        var schema = SchemaHelpers.from(metadata);
+        var schema = ProtoQueryEventEncoder.from(metadata);
 
         assertThat(schema.getInputsCount(), is(metadata.getInputs().size()));
         metadata.getInputs().forEach(this::fromQueryInputMetadata);
@@ -109,7 +99,7 @@ class SchemaHelpersTest {
     }
 
     private void fromQueryFailureInfo(QueryFailureInfo info) {
-        var schema = SchemaHelpers.from(info);
+        var schema = ProtoQueryEventEncoder.from(info);
 
         assertThat(schema.getErrorCode().getCode(), is(info.getErrorCode().getCode()));
         assertThat(schema.getErrorCode().getName(), is(info.getErrorCode().getName()));
@@ -122,7 +112,7 @@ class SchemaHelpersTest {
     }
 
     private void fromQueryCompletedEvent(QueryCompletedEvent event) {
-        var schema = SchemaHelpers.from(event);
+        var schema = ProtoQueryEventEncoder.from(event);
 
         assertThat(schema.getCreateTime(), timestampEqualTo(event.getCreateTime()));
         assertThat(schema.getExecutionStartTime(), timestampEqualTo(event.getExecutionStartTime()));
@@ -137,7 +127,7 @@ class SchemaHelpersTest {
 
     @SuppressWarnings("deprecation")
     private void fromSplitCompletedEvent(SplitCompletedEvent event) {
-        var schema = SchemaHelpers.from(event);
+        var schema = ProtoQueryEventEncoder.from(event);
 
         assertThat(schema.getQueryId(), is(event.getQueryId()));
         assertThat(schema.getStageId(), is(event.getStageId()));
@@ -195,7 +185,7 @@ class SchemaHelpersTest {
     }
 
     private void fromQueryCreatedEvent(QueryCreatedEvent event) {
-        var schema = SchemaHelpers.from(event);
+        var schema = ProtoQueryEventEncoder.from(event);
 
         assertThat(schema.getCreateTime(), timestampEqualTo(event.getCreateTime()));
         fromQueryContext(event.getContext());
@@ -229,5 +219,39 @@ class SchemaHelpersTest {
     @Test
     void fromQueryCreatedEvent() {
         fromQueryCreatedEvent(TestData.FULL_QUERY_CREATED_EVENT);
+    }
+
+    static Matcher<Schema.Duration> durationEqualTo(java.time.Duration expectedDuration) {
+        return new TypeSafeMatcher<>(Schema.Duration.class) {
+
+            @Override
+            public void describeTo(Description description) {
+                description
+                        .appendText("A Schema.Duration equals to:")
+                        .appendValue(expectedDuration);
+            }
+
+            @Override
+            protected boolean matchesSafely(Schema.Duration duration) {
+                return expectedDuration.getSeconds() == duration.getSeconds()
+                        && expectedDuration.getNano() == duration.getNanos();
+            }
+        };
+    }
+
+    static Matcher<Schema.Timestamp> timestampEqualTo(Instant instant) {
+        return new TypeSafeMatcher<>(Schema.Timestamp.class) {
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("A Schema.Timestamp equals to:").appendValue(instant);
+            }
+
+            @Override
+            protected boolean matchesSafely(Schema.Timestamp timestamp) {
+                return instant.getEpochSecond() == timestamp.getSeconds()
+                        && instant.getNano() == timestamp.getNanos();
+            }
+        };
     }
 }

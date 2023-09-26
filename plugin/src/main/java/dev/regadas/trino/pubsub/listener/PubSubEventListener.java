@@ -2,7 +2,7 @@ package dev.regadas.trino.pubsub.listener;
 
 import static java.util.Objects.requireNonNull;
 
-import com.google.protobuf.Message;
+import dev.regadas.trino.pubsub.listener.event.QueryEvent;
 import dev.regadas.trino.pubsub.listener.metrics.EventCounters;
 import dev.regadas.trino.pubsub.listener.metrics.PubSubEventListenerStats;
 import dev.regadas.trino.pubsub.listener.pubsub.PubSubPublisher;
@@ -30,7 +30,7 @@ public final class PubSubEventListener implements EventListener, AutoCloseable {
         this.stats = requireNonNull(stats, "countersPerEventType is null");
     }
 
-    public static final PubSubEventListener create(
+    public static PubSubEventListener create(
             PubSubEventListenerConfig config, PubSubEventListenerStats stats) throws IOException {
         var publisher =
                 PubSubPublisher.create(
@@ -42,7 +42,7 @@ public final class PubSubEventListener implements EventListener, AutoCloseable {
         return create(config, publisher, stats);
     }
 
-    public static final PubSubEventListener create(
+    public static PubSubEventListener create(
             PubSubEventListenerConfig config, Publisher publisher, PubSubEventListenerStats stats) {
         return new PubSubEventListener(config, publisher, stats);
     }
@@ -50,25 +50,25 @@ public final class PubSubEventListener implements EventListener, AutoCloseable {
     @Override
     public void queryCreated(QueryCreatedEvent event) {
         if (config.trackQueryCreatedEvent()) {
-            publish(SchemaHelpers.toQueryEvent(event), stats.getQueryCreated());
+            publish(QueryEvent.queryCreated(event), stats.getQueryCreated());
         }
     }
 
     @Override
     public void queryCompleted(QueryCompletedEvent event) {
         if (config.trackQueryCompletedEvent()) {
-            publish(SchemaHelpers.toQueryEvent(event), stats.getQueryCompleted());
+            publish(QueryEvent.queryCompleted(event), stats.getQueryCompleted());
         }
     }
 
     @Override
     public void splitCompleted(SplitCompletedEvent event) {
         if (config.trackSplitCompletedEvent()) {
-            publish(SchemaHelpers.toQueryEvent(event), stats.getSplitCompleted());
+            publish(QueryEvent.splitCompleted(event), stats.getSplitCompleted());
         }
     }
 
-    void publish(Message event, EventCounters counters) {
+    void publish(QueryEvent event, EventCounters counters) {
         try {
             var future = publisher.publish(event);
 

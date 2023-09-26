@@ -3,6 +3,7 @@ package dev.regadas.trino.pubsub.listener;
 import static io.trino.spi.StandardErrorCode.GENERIC_INTERNAL_ERROR;
 import static java.lang.Boolean.TRUE;
 import static java.time.Duration.ofMillis;
+import static java.time.ZoneOffset.UTC;
 
 import com.google.common.collect.ImmutableMap;
 import io.trino.spi.TrinoWarning;
@@ -29,6 +30,7 @@ import io.trino.spi.eventlistener.StageCpuDistribution;
 import io.trino.spi.eventlistener.StageGcStatistics;
 import io.trino.spi.eventlistener.StageOutputBufferUtilization;
 import io.trino.spi.eventlistener.TableInfo;
+import io.trino.spi.metrics.Count;
 import io.trino.spi.metrics.Metrics;
 import io.trino.spi.resourcegroups.QueryType;
 import io.trino.spi.resourcegroups.ResourceGroupId;
@@ -36,12 +38,15 @@ import io.trino.spi.session.ResourceEstimates;
 import java.net.URI;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 public class TestData {
     public static final QueryMetadata FULL_QUERY_METADATA =
@@ -133,18 +138,19 @@ public class TestData {
             new QueryContext(
                     "user",
                     Optional.of("principal"),
-                    Set.of("group1", "group2"),
+                    // deterministic encounter order
+                    new TreeSet<>(List.of("group1", "group2")),
                     Optional.of("traceToken"),
                     Optional.of("remoteAddress"),
                     Optional.of("userAgent"),
                     Optional.of("clientInfo"),
-                    Set.of("tag1", "tag2", "tag3"),
+                    new TreeSet<>(List.of("tag1", "tag2", "tag3")),
                     Set.of(),
                     Optional.of("source"),
                     Optional.of("catalog"),
                     Optional.of("schema"),
                     Optional.of(new ResourceGroupId("resourceGroup")),
-                    Map.of("property1", "value1", "property2", "value2"),
+                    new TreeMap<>(Map.of("property1", "value1", "property2", "value2")),
                     new ResourceEstimates(Optional.empty(), Optional.empty(), Optional.empty()),
                     "serverAddress",
                     "serverVersion",
@@ -162,7 +168,7 @@ public class TestData {
                                     "table1",
                                     List.of("column1", "column2"),
                                     Optional.of("connectorInfo1"),
-                                    new Metrics(ImmutableMap.of()),
+                                    new Metrics(ImmutableMap.of("count", new SimpleCount(47))),
                                     OptionalLong.of(201),
                                     OptionalLong.of(202)),
                             new QueryInputMetadata(
@@ -206,6 +212,8 @@ public class TestData {
                     Optional.of("failureHost"),
                     "failureJson");
 
+    public static final Instant BASE_INSTANT =
+            LocalDate.of(2023, 9, 1).atStartOfDay(UTC).toInstant();
     public static final QueryCompletedEvent FULL_QUERY_COMPLETED_EVENT =
             new QueryCompletedEvent(
                     FULL_QUERY_METADATA,
@@ -216,9 +224,9 @@ public class TestData {
                     List.of(
                             new TrinoWarning(
                                     StandardWarningCode.TOO_MANY_STAGES, "too many stages")),
-                    Instant.now(),
-                    Instant.now(),
-                    Instant.now());
+                    BASE_INSTANT,
+                    BASE_INSTANT,
+                    BASE_INSTANT);
 
     public static final QueryMetadata MINIMAL_QUERY_METADATA =
             new QueryMetadata(
@@ -314,9 +322,9 @@ public class TestData {
                     MINIMAL_QUERY_IO_METADATA,
                     Optional.empty(),
                     List.of(),
-                    Instant.now(),
-                    Instant.now(),
-                    Instant.now());
+                    BASE_INSTANT,
+                    BASE_INSTANT,
+                    BASE_INSTANT);
 
     private static final SplitStatistics SPLIT_STATS =
             new SplitStatistics(
@@ -335,7 +343,7 @@ public class TestData {
                     "stageA",
                     "task01",
                     Optional.empty(),
-                    Instant.now(),
+                    BASE_INSTANT,
                     Optional.empty(),
                     Optional.empty(),
                     SPLIT_STATS,
@@ -348,13 +356,36 @@ public class TestData {
                     "stageA",
                     "task01",
                     Optional.of("catalog"),
-                    Instant.now(),
-                    Optional.of(Instant.now().minus(Duration.ofMillis(50))),
-                    Optional.of(Instant.now()),
+                    BASE_INSTANT,
+                    Optional.of(BASE_INSTANT.minus(Duration.ofMillis(50))),
+                    Optional.of(BASE_INSTANT),
                     SPLIT_STATS,
                     Optional.of(new SplitFailureInfo("fatal", "boom")),
                     "split payload");
 
     public static final QueryCreatedEvent FULL_QUERY_CREATED_EVENT =
-            new QueryCreatedEvent(Instant.now(), FULL_QUERY_CONTEXT, FULL_QUERY_METADATA);
+            new QueryCreatedEvent(BASE_INSTANT, FULL_QUERY_CONTEXT, FULL_QUERY_METADATA);
+
+    public static class SimpleCount implements Count<Long> {
+        private final long value;
+
+        public SimpleCount(long initialValue) {
+            this.value = initialValue;
+        }
+
+        @Override
+        public Long mergeWith(List<Long> others) {
+            return others.stream().mapToLong(i -> i).sum() + value;
+        }
+
+        @Override
+        public long getTotal() {
+            return value;
+        }
+
+        @Override
+        public Long mergeWith(Long other) {
+            return value + other;
+        }
+    }
 }

@@ -10,13 +10,13 @@ import com.google.api.gax.core.FixedCredentialsProvider;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.Message;
 import com.google.pubsub.v1.PubsubMessage;
 import com.google.pubsub.v1.TopicName;
 import dev.regadas.trino.pubsub.listener.encoder.CompressionEncoder;
 import dev.regadas.trino.pubsub.listener.encoder.Encoder;
 import dev.regadas.trino.pubsub.listener.encoder.Encoding;
-import dev.regadas.trino.pubsub.listener.encoder.MessageEncoder;
+import dev.regadas.trino.pubsub.listener.encoder.QueryEventEncoders;
+import dev.regadas.trino.pubsub.listener.event.QueryEvent;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
@@ -25,10 +25,10 @@ import javax.annotation.Nullable;
 
 public class PubSubPublisher implements Publisher {
     private final com.google.cloud.pubsub.v1.Publisher publisher;
-    private final Encoder<Message> encoder;
+    private final Encoder<QueryEvent> encoder;
 
     public PubSubPublisher(
-            com.google.cloud.pubsub.v1.Publisher publisher, Encoder<Message> encoder) {
+            com.google.cloud.pubsub.v1.Publisher publisher, Encoder<QueryEvent> encoder) {
         this.publisher = requireNonNull(publisher, "publisher is null");
         this.encoder = requireNonNull(encoder, "encoder is null");
     }
@@ -52,14 +52,14 @@ public class PubSubPublisher implements Publisher {
                         .setBatchingSettings(batchingSettings)
                         .build();
 
-        var encoder = CompressionEncoder.create(MessageEncoder.create(encoding));
+        var encoder = CompressionEncoder.create(QueryEventEncoders.create(encoding));
         return new PubSubPublisher(publisher, encoder);
     }
 
     @Override
-    public CompletableFuture<String> publish(Message message) {
+    public CompletableFuture<String> publish(QueryEvent event) {
         try {
-            var data = ByteString.copyFrom(encoder.encode(message));
+            var data = ByteString.copyFrom(encoder.encode(event));
             var pubSubMessage = PubsubMessage.newBuilder().setData(data).build();
 
             var future = publisher.publish(pubSubMessage);

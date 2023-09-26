@@ -1,7 +1,8 @@
-package dev.regadas.trino.pubsub.listener;
+package dev.regadas.trino.pubsub.listener.encoder;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.regadas.trino.pubsub.listener.event.QueryEvent;
 import dev.regadas.trino.pubsub.listener.proto.Schema;
 import dev.regadas.trino.pubsub.listener.proto.Schema.TrinoWarning.Code;
 import io.trino.spi.WarningCode;
@@ -22,10 +23,11 @@ import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public final class SchemaHelpers {
+public final class ProtoQueryEventEncoder implements Encoder<QueryEvent> {
 
-    private static ObjectMapper mapper = new ObjectMapper();
-    private static final Logger LOG = Logger.getLogger(SchemaHelpers.class.getPackage().getName());
+    private static final ObjectMapper mapper = new ObjectMapper();
+    private static final Logger LOG =
+            Logger.getLogger(ProtoQueryEventEncoder.class.getPackage().getName());
 
     private static Optional<String> jsonify(Object obj, String prop) {
         try {
@@ -84,8 +86,8 @@ public final class SchemaHelpers {
     }
 
     static Schema.QueryIOMetadata from(QueryIOMetadata ioMetadata) {
-        var inputs = ioMetadata.getInputs().stream().map(SchemaHelpers::from).toList();
-        var output = ioMetadata.getOutput().map(SchemaHelpers::from);
+        var inputs = ioMetadata.getInputs().stream().map(ProtoQueryEventEncoder::from).toList();
+        var output = ioMetadata.getOutput().map(ProtoQueryEventEncoder::from);
         var ioMeta = Schema.QueryIOMetadata.newBuilder().addAllInputs(inputs);
         output.ifPresent(ioMeta::setOutput);
         return ioMeta.build();
@@ -101,7 +103,7 @@ public final class SchemaHelpers {
 
         inputMetadata
                 .getConnectorInfo()
-                .flatMap(connInfo -> SchemaHelpers.jsonify(connInfo, "connectorInfo"))
+                .flatMap(connInfo -> ProtoQueryEventEncoder.jsonify(connInfo, "connectorInfo"))
                 .ifPresent(inputMetadataBuilder::setConnectorInfo);
 
         jsonify(inputMetadata.getConnectorMetrics(), "connectorMetrics")
@@ -129,7 +131,7 @@ public final class SchemaHelpers {
                 .setColumnType(columnMetadata.getColumnType())
                 .addAllSourceColumns(
                         columnMetadata.getSourceColumns().stream()
-                                .map(SchemaHelpers::from)
+                                .map(ProtoQueryEventEncoder::from)
                                 .toList())
                 .build();
     }
@@ -143,7 +145,7 @@ public final class SchemaHelpers {
 
         output.getColumns()
                 .map(List::stream)
-                .map(s -> s.map(SchemaHelpers::from).toList())
+                .map(s -> s.map(ProtoQueryEventEncoder::from).toList())
                 .ifPresent(outputMetaBuilder::addAllColumns);
 
         output.getJsonLengthLimitExceeded()
@@ -231,15 +233,15 @@ public final class SchemaHelpers {
         return builder.build();
     }
 
-    static Schema.QueryEvent toQueryEvent(QueryCreatedEvent event) {
+    static Schema.QueryEvent toProto(QueryCreatedEvent event) {
         return Schema.QueryEvent.newBuilder().setQueryCreated(from(event)).build();
     }
 
-    static Schema.QueryEvent toQueryEvent(QueryCompletedEvent event) {
+    static Schema.QueryEvent toProto(QueryCompletedEvent event) {
         return Schema.QueryEvent.newBuilder().setQueryCompleted(from(event)).build();
     }
 
-    static Schema.QueryEvent toQueryEvent(SplitCompletedEvent event) {
+    static Schema.QueryEvent toProto(SplitCompletedEvent event) {
         return Schema.QueryEvent.newBuilder().setSplitCompleted(from(event)).build();
     }
 
@@ -335,30 +337,38 @@ public final class SchemaHelpers {
                         .addAllCpuTimeDistribution(cpuDistribution)
                         .addAllOutputBufferUtilization(outputUtilization);
 
-        stats.getScheduledTime().map(SchemaHelpers::from).ifPresent(statsBuilder::setScheduledTime);
+        stats.getScheduledTime()
+                .map(ProtoQueryEventEncoder::from)
+                .ifPresent(statsBuilder::setScheduledTime);
         stats.getResourceWaitingTime()
-                .map(SchemaHelpers::from)
+                .map(ProtoQueryEventEncoder::from)
                 .ifPresent(statsBuilder::setResourceWaitingTime);
-        stats.getAnalysisTime().map(SchemaHelpers::from).ifPresent(statsBuilder::setAnalysisTime);
-        stats.getPlanningTime().map(SchemaHelpers::from).ifPresent(statsBuilder::setPlanningTime);
+        stats.getAnalysisTime()
+                .map(ProtoQueryEventEncoder::from)
+                .ifPresent(statsBuilder::setAnalysisTime);
+        stats.getPlanningTime()
+                .map(ProtoQueryEventEncoder::from)
+                .ifPresent(statsBuilder::setPlanningTime);
         stats.getPlanningCpuTime()
-                .map(SchemaHelpers::from)
+                .map(ProtoQueryEventEncoder::from)
                 .ifPresent(statsBuilder::setPlanningCpuTime);
-        stats.getExecutionTime().map(SchemaHelpers::from).ifPresent(statsBuilder::setExecutionTime);
+        stats.getExecutionTime()
+                .map(ProtoQueryEventEncoder::from)
+                .ifPresent(statsBuilder::setExecutionTime);
         stats.getInputBlockedTime()
-                .map(SchemaHelpers::from)
+                .map(ProtoQueryEventEncoder::from)
                 .ifPresent(statsBuilder::setInputBlockedTime);
         stats.getOutputBlockedTime()
-                .map(SchemaHelpers::from)
+                .map(ProtoQueryEventEncoder::from)
                 .ifPresent(statsBuilder::setOutputBlockedTime);
         stats.getFailedInputBlockedTime()
-                .map(SchemaHelpers::from)
+                .map(ProtoQueryEventEncoder::from)
                 .ifPresent(statsBuilder::setFailedInputBlockedTime);
         stats.getFailedOutputBlockedTime()
-                .map(SchemaHelpers::from)
+                .map(ProtoQueryEventEncoder::from)
                 .ifPresent(statsBuilder::setFailedOutputBlockedTime);
         stats.getPhysicalInputReadTime()
-                .map(SchemaHelpers::from)
+                .map(ProtoQueryEventEncoder::from)
                 .ifPresent(statsBuilder::setPhysicalInputReadTime);
 
         var warnings =
@@ -372,7 +382,7 @@ public final class SchemaHelpers {
                                                 .build())
                         .toList();
 
-        var ioMeta = SchemaHelpers.from(event.getIoMetadata());
+        var ioMeta = ProtoQueryEventEncoder.from(event.getIoMetadata());
 
         var builder =
                 Schema.QueryCompletedEvent.newBuilder()
@@ -384,7 +394,7 @@ public final class SchemaHelpers {
                         .setEndTime(from(event.getEndTime()))
                         .addAllWarnings(warnings)
                         .setIoMetadata(ioMeta);
-        event.getFailureInfo().map(SchemaHelpers::from).ifPresent(builder::setFailureInfo);
+        event.getFailureInfo().map(ProtoQueryEventEncoder::from).ifPresent(builder::setFailureInfo);
 
         return builder.build();
     }
@@ -409,10 +419,10 @@ public final class SchemaHelpers {
                         .setCompletedDataSizeBytes(stats.getCompletedDataSizeBytes());
 
         stats.getTimeToFirstByte()
-                .map(SchemaHelpers::from)
+                .map(ProtoQueryEventEncoder::from)
                 .ifPresent(statsBuilder::setTimeToFirstByte);
         stats.getTimeToLastByte()
-                .map(SchemaHelpers::from)
+                .map(ProtoQueryEventEncoder::from)
                 .ifPresent(statsBuilder::setTimeToLastByte);
 
         var failureInfoBuilder = Schema.SplitFailureInfo.newBuilder();
@@ -433,10 +443,19 @@ public final class SchemaHelpers {
                         .setCreateTime(from(event.getCreateTime()))
                         .setFailureInfo(failureInfoBuilder);
 
-        event.getEndTime().map(SchemaHelpers::from).ifPresent(builder::setEndTime);
-        event.getStartTime().map(SchemaHelpers::from).ifPresent(builder::setStartTime);
+        event.getEndTime().map(ProtoQueryEventEncoder::from).ifPresent(builder::setEndTime);
+        event.getStartTime().map(ProtoQueryEventEncoder::from).ifPresent(builder::setStartTime);
         event.getCatalogName().ifPresent(builder::setCatalogName);
 
         return builder.build();
+    }
+
+    @Override
+    public byte[] encode(QueryEvent event) {
+        return switch (event.kind()) {
+            case QUERY_CREATED -> toProto(event.queryCreated().orElseThrow()).toByteArray();
+            case QUERY_COMPLETED -> toProto(event.queryCompleted().orElseThrow()).toByteArray();
+            case SPLIT_COMPLETED -> toProto(event.splitCompleted().orElseThrow()).toByteArray();
+        };
     }
 }
