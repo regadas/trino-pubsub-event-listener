@@ -81,6 +81,10 @@ class AvroQueryEventEncoderTest {
         queryContext.put("environment", "environment");
         queryContext.put("queryType", new EnumSymbol(queryTypeSchema, "SELECT"));
         queryContext.put("retryPolicy", "TASK");
+        queryContext.put("originalUser", "originalUser");
+        queryContext.put("timezone", "UTC");
+        queryContext.put(
+                "enabledRoles", new Array<>(STRING_ARRAY_SCHEMA, List.of("role1", "role2")));
 
         var metadata = new Record(metadataSchema);
         metadata.put("queryId", "full_query");

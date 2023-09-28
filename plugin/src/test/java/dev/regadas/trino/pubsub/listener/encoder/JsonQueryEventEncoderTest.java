@@ -19,7 +19,9 @@ class JsonQueryEventEncoderTest {
                     "createTime":1693526400.000000000,
                     "context":{
                       "user":"user",
+                      "originalUser":"originalUser",
                       "principal":"principal",
+                      "enabledRoles":["role1","role2"],
                       "groups":["group1","group2"],
                       "traceToken":"traceToken",
                       "remoteClientAddress":"remoteAddress",
@@ -28,6 +30,7 @@ class JsonQueryEventEncoderTest {
                       "clientTags":["tag1","tag2","tag3"],
                       "clientCapabilities":[],
                       "source":"source",
+                      "timezone":"UTC",
                       "catalog":"catalog",
                       "schema":"schema",
                       "resourceGroupId":["resourceGroup"],
