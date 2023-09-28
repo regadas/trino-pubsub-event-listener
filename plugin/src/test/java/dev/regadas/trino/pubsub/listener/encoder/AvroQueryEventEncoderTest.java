@@ -40,7 +40,7 @@ class AvroQueryEventEncoderTest {
     void shouldEncodeQueryEvent() throws Exception {
         var event = QueryEvent.queryCreated(TestData.FULL_QUERY_CREATED_EVENT);
 
-        var queyEventSchema = AvroQueryEventEncoder.avroSchema.getAvroSchema();
+        var queyEventSchema = AvroQueryEventEncoder.getAvroSchema();
         var queryCreatedSchema =
                 queyEventSchema.getField("queryCreated").schema().getTypes().get(1);
         var contextSchema = queryCreatedSchema.getField("context").schema().getTypes().get(1);
@@ -135,7 +135,7 @@ class AvroQueryEventEncoderTest {
 
     @Test
     void shouldEncodeTypesWithJsonfiedFields() throws Exception {
-        var queyEventSchema = AvroQueryEventEncoder.avroSchema.getAvroSchema();
+        var queyEventSchema = AvroQueryEventEncoder.getAvroSchema();
         var queryCompletedSchema =
                 queyEventSchema.getField("queryCompleted").schema().getTypes().get(1);
         var ioMetadataSchema =
@@ -179,7 +179,7 @@ class AvroQueryEventEncoderTest {
 
     @Test
     void shouldEncodeTypesWithDuration() throws Exception {
-        var queyEventSchema = AvroQueryEventEncoder.avroSchema.getAvroSchema();
+        var queyEventSchema = AvroQueryEventEncoder.getAvroSchema();
         var queryCompletedSchema =
                 queyEventSchema.getField("queryCompleted").schema().getTypes().get(1);
         var contextSchema = queryCompletedSchema.getField("context").schema().getTypes().get(1);
