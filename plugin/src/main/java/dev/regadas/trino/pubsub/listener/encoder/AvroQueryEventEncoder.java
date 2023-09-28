@@ -11,10 +11,11 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.annotations.VisibleForTesting;
 import dev.regadas.trino.pubsub.listener.encoder.databinding.PatchSchemaModule;
 import dev.regadas.trino.pubsub.listener.event.QueryEvent;
+import org.apache.avro.Schema;
 
 public class AvroQueryEventEncoder implements Encoder<QueryEvent> {
 
-    @VisibleForTesting static final AvroSchema avroSchema;
+    private static final AvroSchema avroSchema;
 
     private static final AvroMapper MAPPER =
             AvroMapper.builder()
@@ -44,5 +45,9 @@ public class AvroQueryEventEncoder implements Encoder<QueryEvent> {
     @VisibleForTesting
     byte[] encode(Object obj, AvroSchema schema) throws Exception {
         return MAPPER.writer(schema).writeValueAsBytes(obj);
+    }
+
+    public static Schema getAvroSchema() {
+        return avroSchema.getAvroSchema();
     }
 }

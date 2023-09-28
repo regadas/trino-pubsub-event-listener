@@ -135,3 +135,9 @@ signing {
 }
 
 compileJava.dependsOn 'spotlessApply'
+
+task generateAvroSchema(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'dev.regadas.trino.pubsub.listener.utils.AvroSchemaGenerator'
+    args 'src/main/avro/schema.avsc'
+}
