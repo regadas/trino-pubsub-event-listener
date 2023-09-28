@@ -5,8 +5,6 @@ import static java.util.Objects.requireNonNull;
 import dev.regadas.trino.pubsub.listener.event.QueryEvent;
 import dev.regadas.trino.pubsub.listener.metrics.EventCounters;
 import dev.regadas.trino.pubsub.listener.metrics.PubSubEventListenerStats;
-import dev.regadas.trino.pubsub.listener.pubsub.PubSubPublisher;
-import dev.regadas.trino.pubsub.listener.pubsub.Publisher;
 import io.trino.spi.eventlistener.EventListener;
 import io.trino.spi.eventlistener.QueryCompletedEvent;
 import io.trino.spi.eventlistener.QueryCreatedEvent;
