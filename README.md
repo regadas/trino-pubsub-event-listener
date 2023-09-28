@@ -28,7 +28,7 @@ pubsub-event-listener.log-completed=true
 pubsub-event-listener.log-split=false
 pubsub-event-listener.project-id=<gcp-project-id>
 pubsub-event-listener.topic-id=<topic-id>
-pubsub-event-listener.message-format=<proto | json>
+pubsub-event-listener.message-format=<proto | json | avro>
 pubsub-event-listener.credentials-file=<path> # optional
 ```
 
