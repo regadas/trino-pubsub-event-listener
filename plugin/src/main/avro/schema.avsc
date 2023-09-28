@@ -39,6 +39,13 @@
               "java-class" : "java.util.Set"
             } ]
           }, {
+            "name" : "enabledRoles",
+            "type" : [ "null", {
+              "type" : "array",
+              "items" : "string",
+              "java-class" : "java.util.Set"
+            } ]
+          }, {
             "name" : "environment",
             "type" : [ "null", "string" ]
           }, {
@@ -48,6 +55,9 @@
               "items" : "string",
               "java-class" : "java.util.Set"
             } ]
+          }, {
+            "name" : "originalUser",
+            "type" : [ "null", "string" ]
           }, {
             "name" : "principal",
             "type" : [ "null", "string" ]
@@ -114,6 +124,9 @@
             } ]
           }, {
             "name" : "source",
+            "type" : [ "null", "string" ]
+          }, {
+            "name" : "timezone",
             "type" : [ "null", "string" ]
           }, {
             "name" : "traceToken",

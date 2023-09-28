@@ -137,8 +137,9 @@ public class TestData {
     public static final QueryContext FULL_QUERY_CONTEXT =
             new QueryContext(
                     "user",
+                    "originalUser",
                     Optional.of("principal"),
-                    // deterministic encounter order
+                    new TreeSet<>(List.of("role1", "role2")),
                     new TreeSet<>(List.of("group1", "group2")),
                     Optional.of("traceToken"),
                     Optional.of("remoteAddress"),
@@ -147,6 +148,7 @@ public class TestData {
                     new TreeSet<>(List.of("tag1", "tag2", "tag3")),
                     Set.of(),
                     Optional.of("source"),
+                    "UTC",
                     Optional.of("catalog"),
                     Optional.of("schema"),
                     Optional.of(new ResourceGroupId("resourceGroup")),
@@ -291,15 +293,18 @@ public class TestData {
     public static final QueryContext MINIMAL_QUERY_CONTEXT =
             new QueryContext(
                     "user",
-                    Optional.empty(),
-                    Set.of(),
-                    Optional.empty(),
-                    Optional.empty(),
-                    Optional.empty(),
+                    "originalUser",
                     Optional.empty(),
                     Set.of(),
                     Set.of(),
                     Optional.empty(),
+                    Optional.empty(),
+                    Optional.empty(),
+                    Optional.empty(),
+                    Set.of(),
+                    Set.of(),
+                    Optional.empty(),
+                    "UTC",
                     Optional.empty(),
                     Optional.empty(),
                     Optional.empty(),
