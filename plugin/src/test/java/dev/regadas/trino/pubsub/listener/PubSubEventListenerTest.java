@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import dev.regadas.trino.pubsub.listener.encoder.Encoding;
 import dev.regadas.trino.pubsub.listener.event.QueryEvent;
 import dev.regadas.trino.pubsub.listener.metrics.PubSubEventListenerStats;
-import dev.regadas.trino.pubsub.listener.pubsub.Publisher;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.concurrent.CompletableFuture;

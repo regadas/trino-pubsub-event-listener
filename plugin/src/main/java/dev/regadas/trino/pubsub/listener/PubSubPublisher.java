@@ -1,4 +1,4 @@
-package dev.regadas.trino.pubsub.listener.pubsub;
+package dev.regadas.trino.pubsub.listener;
 
 import static java.util.Objects.requireNonNull;
 

@@ -1,4 +1,4 @@
-package dev.regadas.trino.pubsub.listener.pubsub;
+package dev.regadas.trino.pubsub.listener;
 
 import dev.regadas.trino.pubsub.listener.event.QueryEvent;
 import java.util.concurrent.CompletableFuture;
