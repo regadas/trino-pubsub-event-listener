@@ -14,7 +14,7 @@ dependencies {
     compileOnly         "com.google.auto.value:auto-value-annotations:${autoValueVersion}"
     annotationProcessor "com.google.auto.value:auto-value:${autoValueVersion}"
 
-    def trinoVersion = '435'
+    def trinoVersion = '436'
     def jacksonVersion = '2.16.1'
     api "io.trino:trino-spi:${trinoVersion}"
     api "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
@@ -66,7 +66,7 @@ spotless {
     importOrder()
     removeUnusedImports()
     // apply a specific flavor of google-java-format
-    googleJavaFormat('1.16.0').aosp().reflowLongStrings()
+    googleJavaFormat('1.17.0').aosp().reflowLongStrings()
     // fix formatting of type annotations
     formatAnnotations()
   }

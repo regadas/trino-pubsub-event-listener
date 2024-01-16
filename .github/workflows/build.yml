@@ -10,7 +10,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 17
+          java-version: 21
 
       - name: Install Protoc
         uses: arduino/setup-protoc@v2
@@ -18,7 +18,7 @@ jobs:
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
         with:
-          gradle-version: 8.1.1
+          gradle-version: 8.5
 
       - name: Execute Gradle spotlessCheck
         run: ./gradlew spotlessCheck
