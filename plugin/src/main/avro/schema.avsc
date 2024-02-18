@@ -397,10 +397,80 @@
                     "items" : "string"
                   } ]
                 }, {
+                  "name" : "referenceChain",
+                  "type" : [ "null", {
+                    "type" : "array",
+                    "items" : [ {
+                      "type" : "record",
+                      "name" : "ViewReferenceInfo",
+                      "fields" : [ {
+                        "name" : "catalogName",
+                        "type" : [ "null", "string" ]
+                      }, {
+                        "name" : "schemaName",
+                        "type" : [ "null", "string" ]
+                      }, {
+                        "name" : "viewName",
+                        "type" : [ "null", "string" ]
+                      } ]
+                    }, {
+                      "type" : "record",
+                      "name" : "MaterializedViewReferenceInfo",
+                      "fields" : [ {
+                        "name" : "catalogName",
+                        "type" : [ "null", "string" ]
+                      }, {
+                        "name" : "schemaName",
+                        "type" : [ "null", "string" ]
+                      }, {
+                        "name" : "viewName",
+                        "type" : [ "null", "string" ]
+                      } ]
+                    }, {
+                      "type" : "record",
+                      "name" : "RowFilterReferenceInfo",
+                      "fields" : [ {
+                        "name" : "expression",
+                        "type" : [ "null", "string" ]
+                      }, {
+                        "name" : "targetCatalogName",
+                        "type" : [ "null", "string" ]
+                      }, {
+                        "name" : "targetSchemaName",
+                        "type" : [ "null", "string" ]
+                      }, {
+                        "name" : "targetTableName",
+                        "type" : [ "null", "string" ]
+                      } ]
+                    }, {
+                      "type" : "record",
+                      "name" : "ColumnMaskReferenceInfo",
+                      "fields" : [ {
+                        "name" : "expression",
+                        "type" : [ "null", "string" ]
+                      }, {
+                        "name" : "targetCatalogName",
+                        "type" : [ "null", "string" ]
+                      }, {
+                        "name" : "targetColumnName",
+                        "type" : [ "null", "string" ]
+                      }, {
+                        "name" : "targetSchemaName",
+                        "type" : [ "null", "string" ]
+                      }, {
+                        "name" : "targetTableName",
+                        "type" : [ "null", "string" ]
+                      } ]
+                    } ]
+                  } ]
+                }, {
                   "name" : "schema",
                   "type" : [ "null", "string" ]
                 }, {
                   "name" : "table",
+                  "type" : [ "null", "string" ]
+                }, {
+                  "name" : "viewText",
                   "type" : [ "null", "string" ]
                 } ]
               }

@@ -54,6 +54,8 @@ class AvroQueryEventEncoderTest {
                 tablesSchema.getField("columns").schema().getTypes().get(1).getElementType();
         var routinesSchema =
                 metadataSchema.getField("routines").schema().getTypes().get(1).getElementType();
+        var referenceChainSchema =
+                tablesSchema.getField("referenceChain").schema().getTypes().get(1).getElementType();
 
         var queryContext = new Record(contextSchema);
         queryContext.put("user", "user");
@@ -107,6 +109,9 @@ class AvroQueryEventEncoderTest {
         table.put(
                 "columns", new Array<>(Schema.createArray(columnInfoSchema), List.of(columnInfo)));
         table.put("directlyReferenced", true);
+        table.put("viewText", null);
+        table.put(
+                "referenceChain", new Array<>(Schema.createArray(referenceChainSchema), List.of()));
         metadata.put("tables", new Array<>(Schema.createArray(tablesSchema), List.of(table)));
 
         var routine = new Record(routinesSchema);
