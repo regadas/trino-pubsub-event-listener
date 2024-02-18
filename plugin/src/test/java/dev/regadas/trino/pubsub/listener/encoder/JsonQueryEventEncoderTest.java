@@ -65,7 +65,9 @@ class JsonQueryEventEncoderTest {
                           "authorization":"sa",
                           "filters":["column>5"],
                           "columns":[{"column":"column","mask":null}],
-                          "directlyReferenced":true
+                          "directlyReferenced":true,
+                          "viewText":null,
+                          "referenceChain":[]
                         }
                       ],
                       "routines":[
