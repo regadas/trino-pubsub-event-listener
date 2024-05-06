@@ -952,6 +952,322 @@
               }
             } ]
           }, {
+            "name" : "taskStatistics",
+            "type" : [ "null", {
+              "type" : "array",
+              "items" : {
+                "type" : "record",
+                "name" : "StageTaskStatistics",
+                "fields" : [ {
+                  "name" : "cpuTimeDistribution",
+                  "type" : [ "null", {
+                    "type" : "record",
+                    "name" : "LongDistribution",
+                    "fields" : [ {
+                      "name" : "average",
+                      "type" : {
+                        "type" : "double",
+                        "java-class" : "java.lang.Double"
+                      }
+                    }, {
+                      "name" : "max",
+                      "type" : {
+                        "type" : "long",
+                        "java-class" : "java.lang.Long"
+                      }
+                    }, {
+                      "name" : "min",
+                      "type" : {
+                        "type" : "long",
+                        "java-class" : "java.lang.Long"
+                      }
+                    }, {
+                      "name" : "p25",
+                      "type" : {
+                        "type" : "long",
+                        "java-class" : "java.lang.Long"
+                      }
+                    }, {
+                      "name" : "p50",
+                      "type" : {
+                        "type" : "long",
+                        "java-class" : "java.lang.Long"
+                      }
+                    }, {
+                      "name" : "p75",
+                      "type" : {
+                        "type" : "long",
+                        "java-class" : "java.lang.Long"
+                      }
+                    }, {
+                      "name" : "p90",
+                      "type" : {
+                        "type" : "long",
+                        "java-class" : "java.lang.Long"
+                      }
+                    }, {
+                      "name" : "p95",
+                      "type" : {
+                        "type" : "long",
+                        "java-class" : "java.lang.Long"
+                      }
+                    }, {
+                      "name" : "p99",
+                      "type" : {
+                        "type" : "long",
+                        "java-class" : "java.lang.Long"
+                      }
+                    }, {
+                      "name" : "total",
+                      "type" : {
+                        "type" : "long",
+                        "java-class" : "java.lang.Long"
+                      }
+                    } ]
+                  } ]
+                }, {
+                  "name" : "createTimeMillisDistribution",
+                  "type" : [ "null", {
+                    "type" : "record",
+                    "name" : "LongSymmetricDistribution",
+                    "fields" : [ {
+                      "name" : "average",
+                      "type" : {
+                        "type" : "double",
+                        "java-class" : "java.lang.Double"
+                      }
+                    }, {
+                      "name" : "max",
+                      "type" : {
+                        "type" : "long",
+                        "java-class" : "java.lang.Long"
+                      }
+                    }, {
+                      "name" : "min",
+                      "type" : {
+                        "type" : "long",
+                        "java-class" : "java.lang.Long"
+                      }
+                    }, {
+                      "name" : "p01",
+                      "type" : {
+                        "type" : "long",
+                        "java-class" : "java.lang.Long"
+                      }
+                    }, {
+                      "name" : "p05",
+                      "type" : {
+                        "type" : "long",
+                        "java-class" : "java.lang.Long"
+                      }
+                    }, {
+                      "name" : "p10",
+                      "type" : {
+                        "type" : "long",
+                        "java-class" : "java.lang.Long"
+                      }
+                    }, {
+                      "name" : "p25",
+                      "type" : {
+                        "type" : "long",
+                        "java-class" : "java.lang.Long"
+                      }
+                    }, {
+                      "name" : "p50",
+                      "type" : {
+                        "type" : "long",
+                        "java-class" : "java.lang.Long"
+                      }
+                    }, {
+                      "name" : "p75",
+                      "type" : {
+                        "type" : "long",
+                        "java-class" : "java.lang.Long"
+                      }
+                    }, {
+                      "name" : "p90",
+                      "type" : {
+                        "type" : "long",
+                        "java-class" : "java.lang.Long"
+                      }
+                    }, {
+                      "name" : "p95",
+                      "type" : {
+                        "type" : "long",
+                        "java-class" : "java.lang.Long"
+                      }
+                    }, {
+                      "name" : "p99",
+                      "type" : {
+                        "type" : "long",
+                        "java-class" : "java.lang.Long"
+                      }
+                    }, {
+                      "name" : "total",
+                      "type" : {
+                        "type" : "long",
+                        "java-class" : "java.lang.Long"
+                      }
+                    } ]
+                  } ]
+                }, {
+                  "name" : "createTimeScaledDistribution",
+                  "type" : [ "null", {
+                    "type" : "record",
+                    "name" : "DoubleSymmetricDistribution",
+                    "fields" : [ {
+                      "name" : "average",
+                      "type" : {
+                        "type" : "double",
+                        "java-class" : "java.lang.Double"
+                      }
+                    }, {
+                      "name" : "max",
+                      "type" : {
+                        "type" : "double",
+                        "java-class" : "java.lang.Double"
+                      }
+                    }, {
+                      "name" : "min",
+                      "type" : {
+                        "type" : "double",
+                        "java-class" : "java.lang.Double"
+                      }
+                    }, {
+                      "name" : "p01",
+                      "type" : {
+                        "type" : "double",
+                        "java-class" : "java.lang.Double"
+                      }
+                    }, {
+                      "name" : "p05",
+                      "type" : {
+                        "type" : "double",
+                        "java-class" : "java.lang.Double"
+                      }
+                    }, {
+                      "name" : "p10",
+                      "type" : {
+                        "type" : "double",
+                        "java-class" : "java.lang.Double"
+                      }
+                    }, {
+                      "name" : "p25",
+                      "type" : {
+                        "type" : "double",
+                        "java-class" : "java.lang.Double"
+                      }
+                    }, {
+                      "name" : "p50",
+                      "type" : {
+                        "type" : "double",
+                        "java-class" : "java.lang.Double"
+                      }
+                    }, {
+                      "name" : "p75",
+                      "type" : {
+                        "type" : "double",
+                        "java-class" : "java.lang.Double"
+                      }
+                    }, {
+                      "name" : "p90",
+                      "type" : {
+                        "type" : "double",
+                        "java-class" : "java.lang.Double"
+                      }
+                    }, {
+                      "name" : "p95",
+                      "type" : {
+                        "type" : "double",
+                        "java-class" : "java.lang.Double"
+                      }
+                    }, {
+                      "name" : "p99",
+                      "type" : {
+                        "type" : "double",
+                        "java-class" : "java.lang.Double"
+                      }
+                    }, {
+                      "name" : "total",
+                      "type" : {
+                        "type" : "double",
+                        "java-class" : "java.lang.Double"
+                      }
+                    } ]
+                  } ]
+                }, {
+                  "name" : "endTimeMillisDistribution",
+                  "type" : [ "null", "LongSymmetricDistribution" ]
+                }, {
+                  "name" : "endTimeScaledDistribution",
+                  "type" : [ "null", "DoubleSymmetricDistribution" ]
+                }, {
+                  "name" : "firstStartTimeMillisDistribution",
+                  "type" : [ "null", "LongSymmetricDistribution" ]
+                }, {
+                  "name" : "firstStartTimeScaledDistribution",
+                  "type" : [ "null", "DoubleSymmetricDistribution" ]
+                }, {
+                  "name" : "lastEndTimeMillisDistribution",
+                  "type" : [ "null", "LongSymmetricDistribution" ]
+                }, {
+                  "name" : "lastEndTimeScaledDistribution",
+                  "type" : [ "null", "DoubleSymmetricDistribution" ]
+                }, {
+                  "name" : "lastStartTimeMillisDistribution",
+                  "type" : [ "null", "LongSymmetricDistribution" ]
+                }, {
+                  "name" : "lastStartTimeScaledDistribution",
+                  "type" : [ "null", "DoubleSymmetricDistribution" ]
+                }, {
+                  "name" : "outputDataSizeDistribution",
+                  "type" : [ "null", "LongDistribution" ]
+                }, {
+                  "name" : "outputPositionsDistribution",
+                  "type" : [ "null", "LongDistribution" ]
+                }, {
+                  "name" : "peakMemoryReservationDistribution",
+                  "type" : [ "null", "LongDistribution" ]
+                }, {
+                  "name" : "processedInputDataSizeDistribution",
+                  "type" : [ "null", "LongDistribution" ]
+                }, {
+                  "name" : "processedInputPositionsDistribution",
+                  "type" : [ "null", "LongDistribution" ]
+                }, {
+                  "name" : "rawInputDataSizeDistribution",
+                  "type" : [ "null", "LongDistribution" ]
+                }, {
+                  "name" : "rawInputPositionsDistribution",
+                  "type" : [ "null", "LongDistribution" ]
+                }, {
+                  "name" : "scheduledTimeDistribution",
+                  "type" : [ "null", "LongDistribution" ]
+                }, {
+                  "name" : "stageId",
+                  "type" : {
+                    "type" : "int",
+                    "java-class" : "java.lang.Integer"
+                  }
+                }, {
+                  "name" : "tasks",
+                  "type" : {
+                    "type" : "int",
+                    "java-class" : "java.lang.Integer"
+                  }
+                }, {
+                  "name" : "terminatingStartTimeMillisDistribution",
+                  "type" : [ "null", "LongSymmetricDistribution" ]
+                }, {
+                  "name" : "terminatingStartTimeScaledDistribution",
+                  "type" : [ "null", "DoubleSymmetricDistribution" ]
+                }, {
+                  "name" : "totalDriversDistribution",
+                  "type" : [ "null", "LongDistribution" ]
+                } ]
+              }
+            } ]
+          }, {
             "name" : "totalBytes",
             "type" : {
               "type" : "long",

@@ -132,6 +132,7 @@ public class TestData {
                                     100,
                                     200,
                                     Duration.ofSeconds(1500))),
+                    List.of(),
                     List.of("{operator: \"operator1\"}", "{operator: \"operator2\"}"),
                     List.of(new QueryPlanOptimizerStatistics("tablescan", 3, 5, 6, 0)),
                     Optional.of("statsAndCost"));
@@ -286,6 +287,7 @@ public class TestData {
                     Collections.emptyList(),
                     130,
                     false,
+                    Collections.emptyList(),
                     Collections.emptyList(),
                     Collections.emptyList(),
                     Collections.emptyList(),
