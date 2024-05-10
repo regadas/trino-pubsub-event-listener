@@ -14,7 +14,7 @@ dependencies {
     compileOnly         "com.google.auto.value:auto-value-annotations:${autoValueVersion}"
     annotationProcessor "com.google.auto.value:auto-value:${autoValueVersion}"
 
-    def trinoVersion = '446'
+    def trinoVersion = '447'
     def jacksonVersion = '2.17.1'
     api "io.trino:trino-spi:${trinoVersion}"
     api "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
