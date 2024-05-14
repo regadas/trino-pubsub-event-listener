@@ -18,7 +18,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 17
+          java-version: 22
 
       - name: Install Protoc
         uses: arduino/setup-protoc@v3
@@ -26,7 +26,7 @@ jobs:
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v3
         with:
-          gradle-version: 8.0.2
+          gradle-version: 8.7
 
       - name: Prepare
         run: echo "${{ secrets.SIGNING_KEY }}" | base64 --decode > key.gpg
