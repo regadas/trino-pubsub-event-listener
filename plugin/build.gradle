@@ -8,7 +8,6 @@ plugins {
     id 'signing'
 }
 
-
 dependencies {
     def autoValueVersion = '1.10.4'
     compileOnly         "com.google.auto.value:auto-value-annotations:${autoValueVersion}"
