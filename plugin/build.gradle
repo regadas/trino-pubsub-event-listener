@@ -20,7 +20,7 @@ dependencies {
 
     implementation platform('com.google.cloud:libraries-bom:26.54.0')
     implementation 'com.google.cloud:google-cloud-pubsub'
-    implementation 'io.airlift:stats:306'
+    implementation 'io.airlift:stats:309'
     implementation 'io.airlift:aircompressor:2.0.2'
     implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-avro:${jacksonVersion}"
     implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonVersion}"
