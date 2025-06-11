@@ -18,7 +18,7 @@ dependencies {
     api "io.trino:trino-spi:${trinoVersion}"
     api "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
 
-    implementation platform('com.google.cloud:libraries-bom:26.61.0')
+    implementation platform('com.google.cloud:libraries-bom:26.62.0')
     implementation 'com.google.cloud:google-cloud-pubsub'
     implementation 'io.airlift:stats:337'
     implementation 'io.airlift:aircompressor:2.0.2'
