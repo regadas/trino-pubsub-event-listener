@@ -108,16 +108,17 @@ message ColumnDetail {
 message QueryMetadata {
   string query_id = 1;
   string transaction_id = 2;
-  string query = 3;
-  string update_type = 4;
-  string prepared_query = 5;
-  string query_state = 6;
-  string uri = 7;
-  repeated TableInfo tables = 8;
-  repeated RoutineInfo routines = 9;
-  string plan = 10;
-  string json_plan = 11;
-  string payload = 12;
+  string query_span = 3;
+  string query = 4;
+  string update_type = 5;
+  string prepared_query = 6;
+  string query_state = 7;
+  string uri = 8;
+  repeated TableInfo tables = 9;
+  repeated RoutineInfo routines = 10;
+  string plan = 11;
+  string json_plan = 12;
+  string payload = 13;
 }
 
 message RoutineInfo {
@@ -180,6 +181,7 @@ message QueryStatistics {
   repeated OutputBufferUtilization output_buffer_utilization = 37;
   repeated string operator_summaries = 38;
   Duration planning_cpu_time = 39;
+  Duration failed_planning_time = 40;
 }
 
 message StageGcStatistics {
