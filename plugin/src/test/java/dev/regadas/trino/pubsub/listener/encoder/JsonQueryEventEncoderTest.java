@@ -20,6 +20,7 @@ class JsonQueryEventEncoderTest {
                     "context":{
                       "user":"user",
                       "originalUser":"originalUser",
+                      "originalRoles":["role1","role2"],
                       "principal":"principal",
                       "enabledRoles":["role1","role2"],
                       "groups":["group1","group2"],

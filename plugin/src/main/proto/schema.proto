@@ -72,11 +72,16 @@ message QueryIOMetadata {
   QueryOutputMetadata output = 2;
 }
 
+message InputColumn {
+  string name = 1;
+  string type = 2;
+}
+
 message QueryInputMetadata {
   string catalog_name = 1;
   string schema = 2;
   string table = 3;
-  repeated string columns = 4;
+  repeated InputColumn columns = 4;
   string connector_info = 5;
   string connector_metrics = 6;
   int64 physical_input_bytes = 7;

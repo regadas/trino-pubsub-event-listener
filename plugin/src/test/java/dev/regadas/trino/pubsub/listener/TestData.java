@@ -28,6 +28,7 @@ import io.trino.spi.eventlistener.SplitFailureInfo;
 import io.trino.spi.eventlistener.SplitStatistics;
 import io.trino.spi.eventlistener.StageCpuDistribution;
 import io.trino.spi.eventlistener.StageGcStatistics;
+import io.trino.spi.eventlistener.StageOutputBufferMetrics;
 import io.trino.spi.eventlistener.StageOutputBufferUtilization;
 import io.trino.spi.eventlistener.TableInfo;
 import io.trino.spi.metrics.Count;
@@ -134,6 +135,7 @@ public class TestData {
                                     100,
                                     200,
                                     Duration.ofSeconds(1500))),
+                    List.of(new StageOutputBufferMetrics(0, new Metrics(ImmutableMap.of()))),
                     List.of(),
                     List.of(),
                     List.of("{operator: \"operator1\"}", "{operator: \"operator2\"}"),
@@ -144,6 +146,7 @@ public class TestData {
             new QueryContext(
                     "user",
                     "originalUser",
+                    new TreeSet<>(List.of("role1", "role2")),
                     Optional.of("principal"),
                     new TreeSet<>(List.of("role1", "role2")),
                     new TreeSet<>(List.of("group1", "group2")),
@@ -170,21 +173,27 @@ public class TestData {
             new QueryIOMetadata(
                     List.of(
                             new QueryInputMetadata(
+                                    Optional.of("connector1"),
                                     "catalog1",
                                     new CatalogVersion("v1"),
                                     "schema1",
                                     "table1",
-                                    List.of("column1", "column2"),
+                                    List.of(
+                                            new QueryInputMetadata.Column("column1", "varchar"),
+                                            new QueryInputMetadata.Column("column2", "bigint")),
                                     Optional.of("connectorInfo1"),
                                     new Metrics(ImmutableMap.of("count", new SimpleCount(47))),
                                     OptionalLong.of(201),
                                     OptionalLong.of(202)),
                             new QueryInputMetadata(
+                                    Optional.of("connector2"),
                                     "catalog2",
                                     new CatalogVersion("v1"),
                                     "schema2",
                                     "table2",
-                                    List.of("column3", "column4"),
+                                    List.of(
+                                            new QueryInputMetadata.Column("column3", "varchar"),
+                                            new QueryInputMetadata.Column("column4", "bigint")),
                                     Optional.of("connectorInfo2"),
                                     new Metrics(ImmutableMap.of()),
                                     OptionalLong.of(203),
@@ -298,12 +307,14 @@ public class TestData {
                     Collections.emptyList(),
                     Collections.emptyList(),
                     Collections.emptyList(),
+                    Collections.emptyList(),
                     Optional.empty());
 
     public static final QueryContext MINIMAL_QUERY_CONTEXT =
             new QueryContext(
                     "user",
                     "originalUser",
+                    Set.of(),
                     Optional.empty(),
                     Set.of(),
                     Set.of(),

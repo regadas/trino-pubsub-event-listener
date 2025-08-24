@@ -99,7 +99,15 @@ public final class ProtoQueryEventEncoder implements Encoder<QueryEvent> {
                         .setCatalogName(inputMetadata.getCatalogName())
                         .setSchema(inputMetadata.getSchema())
                         .setTable(inputMetadata.getTable())
-                        .addAllColumns(inputMetadata.getColumns());
+                        .addAllColumns(
+                                inputMetadata.getColumns().stream()
+                                        .map(
+                                                col ->
+                                                        Schema.InputColumn.newBuilder()
+                                                                .setName(col.name())
+                                                                .setType(col.type())
+                                                                .build())
+                                        .toList());
 
         inputMetadata
                 .getConnectorInfo()
