@@ -2,7 +2,7 @@
 
 pkgs.mkShell {
   buildInputs = [
-    (pkgs.gradle.override { java = pkgs.jdk23; })
-    pkgs.jdk23
+    (pkgs.gradle.override { java = pkgs.temurin-bin-24; })
+    pkgs.temurin-bin-24
   ];
 }
