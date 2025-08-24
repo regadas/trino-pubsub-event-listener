@@ -62,7 +62,7 @@ jobs:
     - uses: actions/setup-java@v4
       with:
         distribution: temurin
-        java-version: 23
+        java-version: 24
 
     - name: Install Protoc
       uses: arduino/setup-protoc@v3
