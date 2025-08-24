@@ -52,6 +52,7 @@ class JsonQueryEventEncoderTest {
                     "metadata":{
                       "queryId":"full_query",
                       "transactionId":"transactionId",
+                      "encoding":"querySpan",
                       "query":"query",
                       "updateType":"updateType",
                       "preparedQuery":"preparedQuery",

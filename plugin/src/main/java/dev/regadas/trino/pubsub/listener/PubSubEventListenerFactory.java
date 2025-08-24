@@ -15,7 +15,7 @@ public final class PubSubEventListenerFactory implements EventListenerFactory {
     }
 
     @Override
-    public EventListener create(Map<String, String> config) {
+    public EventListener create(Map<String, String> config, EventListenerContext context) {
         var listenerConfig = PubSubEventListenerConfig.create(config);
 
         try {

@@ -171,6 +171,9 @@
                   "java-class" : "java.lang.Integer"
                 }
               }, {
+                "name" : "fatal",
+                "type" : "boolean"
+              }, {
                 "name" : "name",
                 "type" : [ "null", "string" ]
               }, {
@@ -322,6 +325,9 @@
           "type" : "record",
           "name" : "QueryMetadata",
           "fields" : [ {
+            "name" : "encoding",
+            "type" : [ "null", "string" ]
+          }, {
             "name" : "jsonPlan",
             "type" : [ "null", "string" ]
           }, {
@@ -402,28 +408,21 @@
                     "type" : "array",
                     "items" : [ {
                       "type" : "record",
-                      "name" : "ViewReferenceInfo",
+                      "name" : "ColumnMaskReferenceInfo",
                       "fields" : [ {
-                        "name" : "catalogName",
+                        "name" : "expression",
                         "type" : [ "null", "string" ]
                       }, {
-                        "name" : "schemaName",
+                        "name" : "targetCatalogName",
                         "type" : [ "null", "string" ]
                       }, {
-                        "name" : "viewName",
-                        "type" : [ "null", "string" ]
-                      } ]
-                    }, {
-                      "type" : "record",
-                      "name" : "MaterializedViewReferenceInfo",
-                      "fields" : [ {
-                        "name" : "catalogName",
+                        "name" : "targetColumnName",
                         "type" : [ "null", "string" ]
                       }, {
-                        "name" : "schemaName",
+                        "name" : "targetSchemaName",
                         "type" : [ "null", "string" ]
                       }, {
-                        "name" : "viewName",
+                        "name" : "targetTableName",
                         "type" : [ "null", "string" ]
                       } ]
                     }, {
@@ -444,21 +443,28 @@
                       } ]
                     }, {
                       "type" : "record",
-                      "name" : "ColumnMaskReferenceInfo",
+                      "name" : "MaterializedViewReferenceInfo",
                       "fields" : [ {
-                        "name" : "expression",
+                        "name" : "catalogName",
                         "type" : [ "null", "string" ]
                       }, {
-                        "name" : "targetCatalogName",
+                        "name" : "schemaName",
                         "type" : [ "null", "string" ]
                       }, {
-                        "name" : "targetColumnName",
+                        "name" : "viewName",
+                        "type" : [ "null", "string" ]
+                      } ]
+                    }, {
+                      "type" : "record",
+                      "name" : "ViewReferenceInfo",
+                      "fields" : [ {
+                        "name" : "catalogName",
                         "type" : [ "null", "string" ]
                       }, {
-                        "name" : "targetSchemaName",
+                        "name" : "schemaName",
                         "type" : [ "null", "string" ]
                       }, {
-                        "name" : "targetTableName",
+                        "name" : "viewName",
                         "type" : [ "null", "string" ]
                       } ]
                     } ]
@@ -707,6 +713,33 @@
               "java-class" : "java.time.Duration"
             } ]
           }, {
+            "name" : "outputBufferMetrics",
+            "type" : [ "null", {
+              "type" : "array",
+              "items" : {
+                "type" : "record",
+                "name" : "StageOutputBufferMetrics",
+                "fields" : [ {
+                  "name" : "metrics",
+                  "type" : [ "null", {
+                    "type" : "map",
+                    "values" : {
+                      "type" : "record",
+                      "name" : "Metric",
+                      "namespace" : "io.trino.spi.metrics",
+                      "fields" : [ ]
+                    }
+                  } ]
+                }, {
+                  "name" : "stageId",
+                  "type" : {
+                    "type" : "int",
+                    "java-class" : "java.lang.Integer"
+                  }
+                } ]
+              }
+            } ]
+          }, {
             "name" : "outputBufferUtilization",
             "type" : [ "null", {
               "type" : "array",
@@ -950,6 +983,12 @@
                   }
                 } ]
               }
+            } ]
+          }, {
+            "name" : "startingTime",
+            "type" : [ "null", {
+              "type" : "long",
+              "java-class" : "java.time.Duration"
             } ]
           }, {
             "name" : "taskStatistics",
@@ -1202,10 +1241,16 @@
                   "name" : "endTimeScaledDistribution",
                   "type" : [ "null", "DoubleSymmetricDistribution" ]
                 }, {
+                  "name" : "estimatedMemoryReservationDistribution",
+                  "type" : [ "null", "LongDistribution" ]
+                }, {
                   "name" : "firstStartTimeMillisDistribution",
                   "type" : [ "null", "LongSymmetricDistribution" ]
                 }, {
                   "name" : "firstStartTimeScaledDistribution",
+                  "type" : [ "null", "DoubleSymmetricDistribution" ]
+                }, {
+                  "name" : "getSplitDistribution",
                   "type" : [ "null", "DoubleSymmetricDistribution" ]
                 }, {
                   "name" : "lastEndTimeMillisDistribution",
