@@ -84,6 +84,8 @@ class AvroQueryEventEncoderTest {
         queryContext.put("queryType", new EnumSymbol(queryTypeSchema, "SELECT"));
         queryContext.put("retryPolicy", "TASK");
         queryContext.put("originalUser", "originalUser");
+        queryContext.put(
+                "originalRoles", new Array<>(STRING_ARRAY_SCHEMA, List.of("role1", "role2")));
         queryContext.put("timezone", "UTC");
         queryContext.put(
                 "enabledRoles", new Array<>(STRING_ARRAY_SCHEMA, List.of("role1", "role2")));
@@ -150,12 +152,28 @@ class AvroQueryEventEncoderTest {
                 ioMetadataSchema.getField("inputs").schema().getTypes().get(1).getElementType();
 
         var expectedInput = new Record(inputsSchema);
+        expectedInput.put("connectorName", "connectorName");
         expectedInput.put("catalogName", "catalogName");
         expectedInput.put("catalogVersion", "1");
         expectedInput.put("schema", "schema");
         expectedInput.put("table", "table");
-        expectedInput.put(
-                "columns", new Array<>(STRING_ARRAY_SCHEMA, List.of("column1", "column2")));
+        // Create the InputColumn schema that matches our avsc definition
+        var inputColumnSchema = Schema.createRecord("InputColumn", null, null, false);
+        inputColumnSchema.setFields(
+                List.of(
+                        new Schema.Field("name", Schema.create(Schema.Type.STRING)),
+                        new Schema.Field("type", Schema.create(Schema.Type.STRING))));
+        var columnsArraySchema = Schema.createArray(inputColumnSchema);
+
+        // Create column records
+        var column1 = new Record(inputColumnSchema);
+        column1.put("name", "column1");
+        column1.put("type", "varchar");
+        var column2 = new Record(inputColumnSchema);
+        column2.put("name", "column2");
+        column2.put("type", "bigint");
+
+        expectedInput.put("columns", new Array<>(columnsArraySchema, List.of(column1, column2)));
         // jsonified field, connectorInfo defined as Optional<Object>
         expectedInput.put("connectorInfo", "1");
         // jsonified field, connectorMetrics defined as Metrics that contains a Map<String, Metric>
@@ -166,11 +184,14 @@ class AvroQueryEventEncoderTest {
 
         var inputMetadata =
                 new QueryInputMetadata(
+                        Optional.of("connectorName"),
                         "catalogName",
                         new CatalogHandle.CatalogVersion("1"),
                         "schema",
                         "table",
-                        List.of("column1", "column2"),
+                        List.of(
+                                new QueryInputMetadata.Column("column1", "varchar"),
+                                new QueryInputMetadata.Column("column2", "bigint")),
                         Optional.of(1),
                         new Metrics(Map.of("foo", new TestData.SimpleCount(12))),
                         OptionalLong.of(2),

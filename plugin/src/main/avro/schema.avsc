@@ -215,6 +215,9 @@
                 "type" : "record",
                 "name" : "QueryInputMetadata",
                 "fields" : [ {
+                  "name" : "connectorName",
+                  "type" : [ "null", "string" ]
+                }, {
                   "name" : "catalogName",
                   "type" : [ "null", "string" ]
                 }, {
@@ -224,7 +227,17 @@
                   "name" : "columns",
                   "type" : [ "null", {
                     "type" : "array",
-                    "items" : "string"
+                    "items" : {
+                      "type" : "record",
+                      "name" : "InputColumn",
+                      "fields" : [ {
+                        "name" : "name",
+                        "type" : "string"
+                      }, {
+                        "name" : "type",
+                        "type" : "string"
+                      } ]
+                    }
                   } ]
                 }, {
                   "name" : "connectorInfo",
