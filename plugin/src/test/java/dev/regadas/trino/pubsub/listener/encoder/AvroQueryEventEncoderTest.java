@@ -91,6 +91,7 @@ class AvroQueryEventEncoderTest {
         var metadata = new Record(metadataSchema);
         metadata.put("queryId", "full_query");
         metadata.put("transactionId", "transactionId");
+        metadata.put("encoding", "querySpan");
         metadata.put("query", "query");
         metadata.put("updateType", "updateType");
         metadata.put("preparedQuery", "preparedQuery");
