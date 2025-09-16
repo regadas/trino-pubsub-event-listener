@@ -21,7 +21,7 @@ dependencies {
     implementation platform('com.google.cloud:libraries-bom:26.68.0')
     implementation 'com.google.cloud:google-cloud-pubsub'
     implementation 'com.google.protobuf:protobuf-java:4.32.1'
-    implementation 'io.airlift:stats:349'
+    implementation 'io.airlift:stats:358'
     implementation 'io.airlift:aircompressor:2.0.2'
     implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-avro:${jacksonVersion}"
     implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonVersion}"
