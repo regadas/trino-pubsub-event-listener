@@ -9,7 +9,7 @@ plugins {
 }
 
 dependencies {
-    def autoValueVersion = '1.11.0'
+    def autoValueVersion = '1.11.1'
     compileOnly         "com.google.auto.value:auto-value-annotations:${autoValueVersion}"
     annotationProcessor "com.google.auto.value:auto-value:${autoValueVersion}"
 
