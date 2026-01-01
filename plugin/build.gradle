@@ -3,7 +3,7 @@ plugins {
     id 'java-library'
     id 'com.diffplug.spotless' version "8.1.0"
     id 'distribution'
-    id "com.google.protobuf" version "0.9.5"
+    id "com.google.protobuf" version "0.9.6"
     id 'maven-publish'
     id 'signing'
 }
